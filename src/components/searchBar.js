@@ -9,8 +9,29 @@ const SearchBar = () => {
   };
 
   useEffect(() => {
-    const getSuggestions = async () => {};
-  });
+    const getSuggestions = async () => {
+      try {
+        const response = await fetch(
+          `https://api.freshop.com/1/product_search_suggestions`
+        );
+
+        if (!response.ok) {
+          throw new Error("response NOT good");
+        }
+
+        const data = response.json();
+        setSuggestions(data.suggestions);
+      } catch (error) {
+        console.error("Error getting suggestions: ", error);
+      }
+    };
+
+    if (searchInput.length > 2) {
+      getSuggestions();
+    } else {
+      setSuggestions([]);
+    }
+  }, [searchInput]);
 
   return (
     <div>
@@ -21,22 +42,11 @@ const SearchBar = () => {
         value={searchInput}
       />
 
-      <table>
-        <thead>
-          <tr>
-            <th>Country</th>
-            <th>Continent</th>
-          </tr>
-        </thead>
-        <tbody>
-          {filteredData.map((item, index) => (
-            <tr key={index}>
-              <td>{item.country}</td>
-              <td>{item.continent}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+      <ul>
+        {suggestions.map((suggestion, index) => (
+          <li key={index}>{suggestion}</li>
+        ))}
+      </ul>
     </div>
   );
 };
