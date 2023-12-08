@@ -7,7 +7,7 @@ const SearchBar = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [submitClicked, setSubmitClicked] = useState(false);
-
+  const [showDropdown, setShowDropdown] = useState(false);
   // Search suggestion API constants
   const appKey = "family_fare"; //BOTH APIs
   const departmentId = "product"; //Search Suggestion API (OPTIONAL)
@@ -20,8 +20,16 @@ const SearchBar = () => {
   const sort = "relevance";
 
   const handleChange = (e) => {
-    updateSearchInput(e.target.value);
+    const input = e.target.value;
+    updateSearchInput(input);
     setSubmitClicked(false); // Reset submitClicked when input changes
+    setShowDropdown(!!input); //show dropdown menu only if we have input
+  };
+
+  const handleSelectSuggestion = (selectedSuggestion) => {
+    updateSearchInput(selectedSuggestion);
+    setShowDropdown(false);
+    setSubmitClicked(true); // Automatically trigger SearchAPI when suggestion is selected
   };
 
   const SearchSubmit = () => {
@@ -68,8 +76,10 @@ const SearchBar = () => {
 
       const searchResponse = await fetch(
         `https://api.freshop.com/1/products?q=${query}&app_key=${appKey}&store_id=${storeId}&token=${token}&fields=${fields}&limit=${limit}${
-          relevanceSort ? `&relevance_sort=${relevanceSort}` : "" //relevanceSort and renderId are both optional
-        }${renderId ? `&render_id=${renderId}` : ""}`
+          relevanceSort ? `&relevance_sort=${relevanceSort}` : ""
+        }${renderId ? `&render_id=${renderId}` : ""}${
+          sort ? `&sort=${sort}` : ""
+        }`
       );
 
       if (!searchResponse.ok) {
@@ -101,10 +111,10 @@ const SearchBar = () => {
   }, [searchInput, submitClicked]);
   //handles Search API response when submit button clicked
   useEffect(() => {
-    if (searchInput.length > 2 && submitClicked) {
+    if (submitClicked) {
       SearchAPI(searchInput);
     }
-  }, [searchInput, submitClicked]);
+  }, [submitClicked, searchInput]);
 
   return (
     <div>
@@ -115,32 +125,23 @@ const SearchBar = () => {
         value={searchInput}
       />
 
-      <button onClick={SearchSubmit}>Submit</button>
-
-      <ul>
+      <ul style={{ display: showDropdown ? "block" : "none" }}>
         {suggestions.map((suggestion, index) => (
-          <li key={index}>{suggestion}</li>
+          <li key={index} onClick={() => handleSelectSuggestion(suggestion)}>
+            {suggestion}
+          </li>
         ))}
       </ul>
 
-      <p>
-        {suggestions.length > 0
-          ? `Suggestions: ${suggestions.join(", ")}`
-          : "No suggestions"}
-      </p>
+      <button onClick={SearchSubmit}>Submit</button>
+      <ul>
+        {searchResults.map((result) => (
+          <li key={result.id}>{result.name}</li>
+        ))}
+      </ul>
 
       {loading && <p>Loading...</p>}
       {error && <p>Error: {error}</p>}
-      {searchResults.length > 0 && (
-        <div>
-          <h2>Search Results: </h2>
-          <ul>
-            {searchResults.map((result) => (
-              <li key={result.id}>{result.name}</li>
-            ))}
-          </ul>
-        </div>
-      )}
     </div>
   );
 };
