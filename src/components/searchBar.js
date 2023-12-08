@@ -32,11 +32,11 @@ const SearchBar = () => {
     setSubmitClicked(true); // Automatically trigger SearchAPI when suggestion is selected
   };
 
-  const SearchSubmit = () => {
-    if (searchInput.length > 2) {
-      setSubmitClicked(true);
-    }
-  };
+  // const SearchSubmit = () => {
+  //   if (searchInput.length > 2) {
+  //     setSubmitClicked(true);
+  //   }
+  // };
 
   const SearchSuggestionsAPI = async (query) => {
     try {
@@ -56,8 +56,12 @@ const SearchBar = () => {
 
       console.log("Search Suggestion API Response:", suggestionData);
 
-      if (suggestionData && suggestionData.suggestions) {
-        updateSuggestions(suggestionData.suggestions);
+      if (suggestionData && suggestionData.q && suggestionData.variants) {
+        const parsedSuggestions = [
+          ...suggestionData.q,
+          ...suggestionData.variants,
+        ];
+        updateSuggestions(parsedSuggestions);
       } else {
         updateSuggestions([]);
       }
@@ -105,9 +109,14 @@ const SearchBar = () => {
 
   //makes sure Search Suggestion API automatically responds without clicking submit button
   useEffect(() => {
-    if (searchInput.length > 2 && !submitClicked) {
-      SearchSuggestionsAPI(searchInput);
-    }
+    // Debounce mechanism to limit API calls while typing
+    const timer = setTimeout(() => {
+      if (searchInput.length > 0 && !submitClicked) {
+        SearchSuggestionsAPI(searchInput);
+      }
+    }, 300);
+
+    return () => clearTimeout(timer);
   }, [searchInput, submitClicked]);
   //handles Search API response when submit button clicked
   useEffect(() => {
@@ -133,7 +142,8 @@ const SearchBar = () => {
         ))}
       </ul>
 
-      <button onClick={SearchSubmit}>Submit</button>
+      <button onClick={() => setSubmitClicked(true)}>Submit</button>
+
       <ul>
         {searchResults.map((result) => (
           <li key={result.id}>{result.name}</li>
