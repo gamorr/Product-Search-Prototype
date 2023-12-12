@@ -49,7 +49,7 @@ const SearchBar = ({ style }) => {
     updateSearchInput(selectedSuggestion); //heres the search input
     setShowDropdown(false); //hide the suggestions dropdown
     setSubmitClicked(true); //trigger search
-    // SearchAPI(selectedSuggestion); // Clear suggestions here if needed
+    SearchAPI(selectedSuggestion); // Clear suggestions here if needed
     updateSuggestionsQ([]);
     updateSuggestionsVariants([]);
   };
@@ -133,7 +133,7 @@ const SearchBar = ({ style }) => {
       if (searchInput.length > 0 && !submitClicked) {
         SearchSuggestionsAPI(searchInput); //fetch suggestions if input is present and no submit occurred
       }
-    }, 15);
+    }, 20);
 
     return () => clearTimeout(debounceTimer);
   }, [searchInput]);
@@ -179,7 +179,7 @@ const SearchBar = ({ style }) => {
           onFocus={() => setShowDropdown(!!searchInput)}
           onBlur={() => {
             // Delay hiding the dropdown to allow time for the suggestion click event to trigger
-            setTimeout(() => setShowDropdown(false), 80);
+            setTimeout(() => setShowDropdown(false), 100);
           }}
         />
 
@@ -210,17 +210,7 @@ const SearchBar = ({ style }) => {
       {showResultGrid &&
         searchResults.items &&
         searchResults.items.length > 0 && (
-          <div style={{ marginTop: "16px" }}>
-            <h3>Search Results</h3>
-            {console.log("Search Results Structure:", searchResults.items)}
-            <ul>
-              {searchResults.items.map((item, index) => (
-                <li key={index}>
-                  {item.name} - {item.price}
-                </li>
-              ))}
-            </ul>
-          </div>
+          <SearchResultGrid results={searchResults} />
         )}
     </div>
   );
