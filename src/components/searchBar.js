@@ -1,12 +1,12 @@
 import React, { useState, useEffect, useRef } from "react";
 import { styles } from "./style/searchBarStyle";
 import SearchInput from "./SearchInput";
-import SearchSuggestionDropdown from "./DropdownMenu";
 import SubmitButton from "./SubmitButton";
 import LoadingIndicator from "./LoadingIndicator";
 import ErrorMessage from "./ErrorMessage";
 import SearchResults from "./SearchResults";
 import DropdownMenu from "./DropdownMenu";
+import SearchResultGrid from "./SearchResultGrid";
 
 const SearchBar = ({ style }) => {
   const [searchInput, updateSearchInput] = useState("");
@@ -17,6 +17,7 @@ const SearchBar = ({ style }) => {
   const [error, setError] = useState(null);
   const [submitClicked, setSubmitClicked] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
+  const [showResultGrid, setShowResultGrid] = useState(false);
   const suggestionsContainerRef = useRef(null);
   const appKey = "family_fare";
   const departmentId = "product";
@@ -37,12 +38,16 @@ const SearchBar = ({ style }) => {
     //clear suggestions on submit for a cleaner UI
     updateSuggestionsQ([]);
     updateSuggestionsVariants([]);
+    setShowResultGrid(true);
   };
 
   const handleSelectSuggestion = (selectedSuggestion) => {
     updateSearchInput(selectedSuggestion);
     setShowDropdown(false);
     setSubmitClicked(true);
+    // Clear suggestions here if needed
+    updateSuggestionsQ([]);
+    updateSuggestionsVariants([]);
   };
 
   const SearchSuggestionsAPI = async (query) => {
@@ -152,66 +157,11 @@ const SearchBar = ({ style }) => {
     };
   }, [suggestionsContainerRef]);
 
-  //   return (
-  //     <div style={{ position: "relative" }}>
-  //       {/* Search Input and Submit Button Container */}
-  //       <div
-  //         style={{
-  //           display: "flex",
-  //           alignItems: "center",
-  //           position: "absolute",
-  //           width: "90%",
-  //         }}
-  //       >
-  //         {/* Search Input Component */}
-  //         <SearchInput
-  //           value={searchInput}
-  //           onChange={handleChange}
-  //           onFocus={() => setShowDropdown(!!searchInput)}
-  //           onBlur={() => setShowDropdown(false)}
-  //           style={{ top: "10px" }}
-  //         />
-
-  //         {/* Submit button */}
-  //         <SubmitButton
-  //           onClick={handleSearchSubmit}
-  //           style={{ marginLeft: "8px", background: "red", position: "absolute" }}
-  //         />
-  //       </div>
-
-  //       {/* Suggestions Dropdown Component */}
-  //       {showDropdown && (
-  //         <DropdownMenu
-  //           suggestionsQ={suggestionsQ}
-  //           onSelectSuggestion={handleSelectSuggestion}
-  //           style={{
-  //             position: "absolute",
-  //             top: "100%",
-  //             left: 0,
-  //             width: "100%",
-  //             background: "white",
-  //             boxShadow: "0 2px 5px rgba(0, 0, 0, 0.1)",
-  //           }}
-  //         />
-  //       )}
-
-  //       {/* Loading Indicator */}
-  //       {loading && <LoadingIndicator />}
-
-  //       {/* Error Message */}
-  //       {error && <ErrorMessage message={error} />}
-
-  //       {/* Search Results Component */}
-  //       <SearchResults results={searchResults} />
-  //     </div>
-  //   );
-  // };
   return (
     <div style={style}>
       <div
         style={{ display: "flex", alignItems: "center", position: "relative" }}
       >
-        {/* Search Input Component */}
         <SearchInput
           value={searchInput}
           onChange={handleChange}
@@ -219,22 +169,12 @@ const SearchBar = ({ style }) => {
           onBlur={() => setShowDropdown(false)}
         />
 
-        {/* Submit button */}
         <SubmitButton
           onClick={handleSearchSubmit}
-          style={{
-            marginLeft: "8px",
-            backgroundColor: "red",
-            color: "white",
-            border: "none",
-            padding: "8px 16px",
-            borderRadius: "8px",
-            cursor: "pointer",
-          }}
+          style={{ marginleft: "8px" }}
         />
       </div>
 
-      {/* Suggestions Dropdown Component */}
       {showDropdown && (
         <DropdownMenu
           suggestionsQ={suggestionsQ}
@@ -251,14 +191,15 @@ const SearchBar = ({ style }) => {
         />
       )}
 
-      {/* Loading Indicator */}
       {loading && <LoadingIndicator />}
 
-      {/* Error Message */}
       {error && <ErrorMessage message={error} />}
 
-      {/* Search Results Component */}
-      <SearchResults results={searchResults} />
+      {showResultGrid &&
+        searchResults.items &&
+        searchResults.items.length > 0 && (
+          <SearchResultGrid results={searchResults} />
+        )}
     </div>
   );
 };

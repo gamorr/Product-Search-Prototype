@@ -5,7 +5,7 @@ const SubmitButton = ({ onClick, style }) => {
     <button
       onClick={onClick}
       style={{
-        backgroundColor: "red", //sets the background color to red
+        backgroundColor: "#DC143C", //sets the background color to red
         color: "white", //sets the text color to white
         border: "none", //removes the border for a cleaner appearance
         padding: "8px 16px", //for better aesthetics
