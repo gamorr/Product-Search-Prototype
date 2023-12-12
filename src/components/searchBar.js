@@ -49,7 +49,7 @@ const SearchBar = ({ style }) => {
     updateSearchInput(selectedSuggestion); //heres the search input
     setShowDropdown(false); //hide the suggestions dropdown
     setSubmitClicked(true); //trigger search
-    SearchAPI(selectedSuggestion); // Clear suggestions here if needed
+    // SearchAPI(selectedSuggestion); // Clear suggestions here if needed
     updateSuggestionsQ([]);
     updateSuggestionsVariants([]);
   };
