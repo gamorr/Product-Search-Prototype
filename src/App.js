@@ -1,15 +1,14 @@
 import React from "react";
 import family_fare_img from "./__mocks__/family_fare_img.webp";
 import "./App.css";
-import SearchBar from "./components/SearchBar";
 import SearchResults from "./components/SearchResults";
+import SearchBar from "./components/SearchBar";
 
 function App() {
   return (
     <div className="App">
       <img
         src={family_fare_img}
-        alt="Family Fare Image"
         style={{
           width: "300px",
           height: "120px",

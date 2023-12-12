@@ -1,5 +1,3 @@
-// SearchResults.js
-
 import React from "react";
 
 const SearchResults = ({ results }) => {
