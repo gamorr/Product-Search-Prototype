@@ -1,48 +1,58 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
+import { styles } from "./style/searchBarStyle";
+import SearchInput from "./SearchInput";
+import SearchSuggestionDropdown from "./DropdownMenu";
+import SubmitButton from "./SubmitButton";
+import LoadingIndicator from "./LoadingIndicator";
+import ErrorMessage from "./ErrorMessage";
+import SearchResults from "./SearchResults";
+import DropdownMenu from "./DropdownMenu";
 
-const SearchBar = () => {
-  const [searchInput, updateSearchInput] = useState(""); //Search API
-  const [suggestions, updateSuggestions] = useState([]); //Search Suggestion AP
+const SearchBar = ({ style }) => {
+  const [searchInput, updateSearchInput] = useState("");
+  const [suggestionsQ, updateSuggestionsQ] = useState([]);
+  const [suggestionsVariants, updateSuggestionsVariants] = useState([]);
   const [searchResults, updateSearchResults] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [submitClicked, setSubmitClicked] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
-  // Search suggestion API constants
-  const appKey = "family_fare"; //BOTH APIs
-  const departmentId = "product"; //Search Suggestion API (OPTIONAL)
-  const storeId = "6373"; //BOTH APIs
-  const token = process.env.REACT_APP_TOKEN; //BOTH APIs
-  const fields = "id,name,price"; //Search API
-  const limit = 5; //Search API
-  const relevanceSort = "asc"; //Search API (OPTIONAL)
-  const renderId = 1701187538668; //Search API (OPTIONAL)
-  const sort = "relevance";
+  const suggestionsContainerRef = useRef(null);
+  const appKey = "family_fare";
+  const departmentId = "product";
+  const storeId = "6373";
+  const token = process.env.REACT_APP_TOKEN;
+  const fields = "id, name, price, cover_image";
+  const limit = 5;
 
   const handleChange = (e) => {
     const input = e.target.value;
     updateSearchInput(input);
-    setSubmitClicked(false); // Reset submitClicked when input changes
-    setShowDropdown(!!input); //show dropdown menu only if we have input
+    setSubmitClicked(false);
+    setShowDropdown(!!input);
+  };
+
+  const handleSearchSubmit = () => {
+    setSubmitClicked(true);
+    //clear suggestions on submit for a cleaner UI
+    updateSuggestionsQ([]);
+    updateSuggestionsVariants([]);
   };
 
   const handleSelectSuggestion = (selectedSuggestion) => {
     updateSearchInput(selectedSuggestion);
     setShowDropdown(false);
-    setSubmitClicked(true); // Automatically trigger SearchAPI when suggestion is selected
+    setSubmitClicked(true);
   };
-
-  // const SearchSubmit = () => {
-  //   if (searchInput.length > 2) {
-  //     setSubmitClicked(true);
-  //   }
-  // };
 
   const SearchSuggestionsAPI = async (query) => {
     try {
+      setLoading(true);
+      setError(null);
+
       const suggestionResponse = await fetch(
         `https://api.freshop.com/1/product_search_suggestions?q=${query}&app_key=${appKey}&${
-          departmentId ? `department_id=${departmentId}&` : "" //departmentID is optional
+          departmentId ? `department_id=${departmentId}&` : ""
         }store_id=${storeId}&token=${token}`
       );
 
@@ -56,14 +66,16 @@ const SearchBar = () => {
 
       console.log("Search Suggestion API Response:", suggestionData);
 
-      if (suggestionData && suggestionData.q && suggestionData.variants) {
-        const parsedSuggestions = [
-          ...suggestionData.q,
-          ...suggestionData.variants,
-        ];
-        updateSuggestions(parsedSuggestions);
+      if (suggestionData?.q) {
+        updateSuggestionsQ(suggestionData.q);
       } else {
-        updateSuggestions([]);
+        updateSuggestionsQ([]);
+      }
+
+      if (suggestionData?.variants) {
+        updateSuggestionsVariants(suggestionData.variants);
+      } else {
+        updateSuggestionsVariants([]);
       }
     } catch (error) {
       console.error("Error searching for suggestions:", error.message);
@@ -79,11 +91,7 @@ const SearchBar = () => {
       setError(null);
 
       const searchResponse = await fetch(
-        `https://api.freshop.com/1/products?q=${query}&app_key=${appKey}&store_id=${storeId}&token=${token}&fields=${fields}&limit=${limit}${
-          relevanceSort ? `&relevance_sort=${relevanceSort}` : ""
-        }${renderId ? `&render_id=${renderId}` : ""}${
-          sort ? `&sort=${sort}` : ""
-        }`
+        `https://api.freshop.com/1/products?q=${query}&app_key=${appKey}&store_id=${storeId}&token=${token}&fields=${fields}&limit=${limit}`
       );
 
       if (!searchResponse.ok) {
@@ -107,53 +115,151 @@ const SearchBar = () => {
     }
   };
 
-  //makes sure Search Suggestion API automatically responds without clicking submit button
   useEffect(() => {
-    // Debounce mechanism to limit API calls while typing
-    const timer = setTimeout(() => {
+    const debounceTimer = setTimeout(() => {
       if (searchInput.length > 0 && !submitClicked) {
         SearchSuggestionsAPI(searchInput);
       }
     }, 300);
 
-    return () => clearTimeout(timer);
-  }, [searchInput, submitClicked]);
-  //handles Search API response when submit button clicked
+    return () => clearTimeout(debounceTimer);
+  }, [searchInput]);
+
   useEffect(() => {
     if (submitClicked) {
       SearchAPI(searchInput);
+      setSubmitClicked(false);
+      //clear suggestions on submit here too
+      updateSuggestionsQ([]);
+      updateSuggestionsVariants([]);
     }
   }, [submitClicked, searchInput]);
 
+  useEffect(() => {
+    const handleDocumentClick = (e) => {
+      if (
+        suggestionsContainerRef.current &&
+        !suggestionsContainerRef.current.contains(e.target)
+      ) {
+        setShowDropdown(false);
+      }
+    };
+
+    document.addEventListener("click", handleDocumentClick);
+
+    return () => {
+      document.removeEventListener("click", handleDocumentClick);
+    };
+  }, [suggestionsContainerRef]);
+
+  //   return (
+  //     <div style={{ position: "relative" }}>
+  //       {/* Search Input and Submit Button Container */}
+  //       <div
+  //         style={{
+  //           display: "flex",
+  //           alignItems: "center",
+  //           position: "absolute",
+  //           width: "90%",
+  //         }}
+  //       >
+  //         {/* Search Input Component */}
+  //         <SearchInput
+  //           value={searchInput}
+  //           onChange={handleChange}
+  //           onFocus={() => setShowDropdown(!!searchInput)}
+  //           onBlur={() => setShowDropdown(false)}
+  //           style={{ top: "10px" }}
+  //         />
+
+  //         {/* Submit button */}
+  //         <SubmitButton
+  //           onClick={handleSearchSubmit}
+  //           style={{ marginLeft: "8px", background: "red", position: "absolute" }}
+  //         />
+  //       </div>
+
+  //       {/* Suggestions Dropdown Component */}
+  //       {showDropdown && (
+  //         <DropdownMenu
+  //           suggestionsQ={suggestionsQ}
+  //           onSelectSuggestion={handleSelectSuggestion}
+  //           style={{
+  //             position: "absolute",
+  //             top: "100%",
+  //             left: 0,
+  //             width: "100%",
+  //             background: "white",
+  //             boxShadow: "0 2px 5px rgba(0, 0, 0, 0.1)",
+  //           }}
+  //         />
+  //       )}
+
+  //       {/* Loading Indicator */}
+  //       {loading && <LoadingIndicator />}
+
+  //       {/* Error Message */}
+  //       {error && <ErrorMessage message={error} />}
+
+  //       {/* Search Results Component */}
+  //       <SearchResults results={searchResults} />
+  //     </div>
+  //   );
+  // };
   return (
-    <div>
-      <input
-        type="search"
-        placeholder="Search here"
-        onChange={handleChange}
-        value={searchInput}
-      />
+    <div style={style}>
+      <div
+        style={{ display: "flex", alignItems: "center", position: "relative" }}
+      >
+        {/* Search Input Component */}
+        <SearchInput
+          value={searchInput}
+          onChange={handleChange}
+          onFocus={() => setShowDropdown(!!searchInput)}
+          onBlur={() => setShowDropdown(false)}
+        />
 
-      <ul style={{ display: showDropdown ? "block" : "none" }}>
-        {suggestions.map((suggestion, index) => (
-          <li key={index} onClick={() => handleSelectSuggestion(suggestion)}>
-            {suggestion}
-          </li>
-        ))}
-      </ul>
+        {/* Submit button */}
+        <SubmitButton
+          onClick={handleSearchSubmit}
+          style={{
+            marginLeft: "8px",
+            backgroundColor: "red",
+            color: "white",
+            border: "none",
+            padding: "8px 16px",
+            borderRadius: "8px",
+            cursor: "pointer",
+          }}
+        />
+      </div>
 
-      <button onClick={() => setSubmitClicked(true)}>Submit</button>
+      {/* Suggestions Dropdown Component */}
+      {showDropdown && (
+        <DropdownMenu
+          suggestionsQ={suggestionsQ}
+          onSelectSuggestion={handleSelectSuggestion}
+          style={{
+            position: "absolute",
+            top: "100%",
+            left: 0,
+            width: "100%",
+            background: "white",
+            boxShadow: "0 2px 5px rgba(0, 0, 0, 0.1)",
+            borderRadius: "8px",
+          }}
+        />
+      )}
 
-      <ul>
-        {searchResults.map((result) => (
-          <li key={result.id}>{result.name}</li>
-        ))}
-      </ul>
+      {/* Loading Indicator */}
+      {loading && <LoadingIndicator />}
 
-      {loading && <p>Loading...</p>}
-      {error && <p>Error: {error}</p>}
+      {/* Error Message */}
+      {error && <ErrorMessage message={error} />}
+
+      {/* Search Results Component */}
+      <SearchResults results={searchResults} />
     </div>
   );
 };
-
 export default SearchBar;

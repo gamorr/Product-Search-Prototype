@@ -1,16 +1,44 @@
 import React from "react";
-import logo from "./__mocks__/logo.svg";
+import family_fare_img from "./__mocks__/family_fare_img.webp";
 import "./App.css";
-import SearchBar from "./components/searchBar";
+import SearchBar from "./components/SearchBar";
+import SearchResults from "./components/SearchResults";
 
 function App() {
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <SearchBar />
-        <p>Skunkworks Product Search</p>
-      </header>
+      <img
+        src={family_fare_img}
+        alt="Family Fare Image"
+        style={{
+          width: "300px",
+          height: "120px",
+          position: "absolute",
+          top: "80px",
+          left: 0,
+        }}
+      />
+      <p
+        style={{
+          fontSize: "24px",
+          fontWeight: "bold",
+          margin: "0",
+          top: "80px",
+          height: "50px",
+          color: "yellow",
+          backgroundColor: "black",
+        }}
+      >
+        Skunk Works Product Search
+      </p>
+      <SearchBar
+        style={{
+          position: "absolute",
+          top: "120px", // Adjust this value to your preferred height
+          left: "320px", // Adjust this value based on your layout requirements
+        }}
+      />
+      <SearchResults results={[]} />
     </div>
   );
 }
