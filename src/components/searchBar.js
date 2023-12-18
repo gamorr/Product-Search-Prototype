@@ -1,14 +1,11 @@
 import React, { useState, useEffect, useRef } from "react";
-import { styles } from "./style/searchBarStyle";
 import SearchInput from "./SearchInput";
 import SubmitButton from "./SubmitButton";
 import ErrorMessage from "./ErrorMessage";
-import SearchResults from "./SearchResults";
 import DropdownMenu from "./DropdownMenu";
-import SearchResultGrid from "./SearchResultGrid";
 
 //this is our SearchBar component
-const SearchBar = ({ style }) => {
+const SearchBar = ({ style, updateApiData }) => {
   const [searchInput, updateSearchInput] = useState(""); //stores current search input
   const [suggestionsQ, updateSuggestionsQ] = useState([]); //stores the suggested queries from the API
   const [suggestionsVariants, updateSuggestionsVariants] = useState([]); //stores the suggested query variants from the API
@@ -26,6 +23,8 @@ const SearchBar = ({ style }) => {
   const token = process.env.REACT_APP_TOKEN; //freshop api token
   const fields = "id, name, price, cover_image"; //fields for Search API
   const limit = 5; //maximum number of search results to return
+  const relevance_sort = "asc";
+  const render_id = "1701187538668";
 
   //handle changes in the search input field
   const handleChange = (e) => {
@@ -39,8 +38,8 @@ const SearchBar = ({ style }) => {
   const handleSearchSubmit = () => {
     setSubmitClicked(true); //set submit flag
     //clear suggestions on submit for a cleaner UI
-    updateSuggestionsQ([]);
-    updateSuggestionsVariants([]);
+    updateSuggestionsQ([]); //for q value in object
+    updateSuggestionsVariants([]); //for variants value in object
     setShowResultGrid(true); //this SHOULD show the result grid
   };
 
@@ -98,13 +97,24 @@ const SearchBar = ({ style }) => {
   //fetch search results from the Freshop API
   const SearchAPI = async (query) => {
     try {
-      setLoading(true); //indicate loading state
+      setLoading(true); //indicates loading state
       setError(null); //this clears any previous errors
 
-      const searchResponse = await fetch(
-        `https://api.freshop.com/1/products?q=${query}&app_key=${appKey}&store_id=${storeId}&token=${token}&fields=${fields}&limit=${limit}`
-      );
+      // const searchResponse = await fetch(
+      //   `https://api.freshop.com/1/products?q=${query}&app_key=${appKey}&fields=${fields}&limit=${limit}&store_id=${storeId}&token=${token}`
+      // );
+      // Construct the URL with optional parameters
+      const url = `https://api.freshop.com/1/products?q=${query}&app_key=${appKey}&fields=${fields}&limit=${limit}&store_id=${storeId}&token=${token}`;
 
+      // Conditionally include optional parameters
+      const params = new URLSearchParams({
+        relevance_sort,
+        render_id,
+      });
+      //we use URLSearchParams so that we can
+      const fullUrl = `${url}&${params.toString()}`;
+
+      const searchResponse = await fetch(fullUrl);
       if (!searchResponse.ok) {
         throw new Error(`Search response NOT good: ${searchResponse.status}`);
       }
@@ -116,6 +126,8 @@ const SearchBar = ({ style }) => {
       if (searchData && searchData.results) {
         //update the search results state
         updateSearchResults(searchData.results);
+        // Call the updateApiData function to update the API data in the App.js state
+        updateApiData(searchData);
       } else {
         updateSearchResults([]); //this clears the results if there isn't anything found
       }
@@ -133,7 +145,7 @@ const SearchBar = ({ style }) => {
       if (searchInput.length > 0 && !submitClicked) {
         SearchSuggestionsAPI(searchInput); //fetch suggestions if input is present and no submit occurred
       }
-    }, 20);
+    }, 15);
 
     return () => clearTimeout(debounceTimer);
   }, [searchInput]);
@@ -201,17 +213,12 @@ const SearchBar = ({ style }) => {
             background: "white", //set background color
             boxShadow: "0 2px 5px rgba(0, 0, 0, 0.1)", //apply shadow for depth
             borderRadius: "8px", //apply rounded corners for aesthetics
+            left: "0",
           }}
         />
       )}
 
       {error && <ErrorMessage message={error} />}
-
-      {showResultGrid &&
-        searchResults.items &&
-        searchResults.items.length > 0 && (
-          <SearchResultGrid results={searchResults} />
-        )}
     </div>
   );
 };

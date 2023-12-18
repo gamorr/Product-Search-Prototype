@@ -30,7 +30,8 @@
   "jest": {
     "moduleNameMapper": {
       "\\.(svg)$": "<rootDir>/src/__mocks__/logo.svg"
-    }
+    },
+    "testEnvironment": "jsdom"
   },
   "browserslist": {
     "production": [
@@ -48,6 +49,7 @@
     "@babel/core": "^7.23.5",
     "@babel/preset-env": "^7.23.5",
     "@babel/preset-react": "^7.23.3",
-    "jest": "^27.5.1"
+    "jest": "^27.5.1",
+    "jest-fetch-mock": "^3.0.3"
   }
 }
