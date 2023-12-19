@@ -3,6 +3,7 @@ import SearchInput from "./SearchInput";
 import SubmitButton from "./SubmitButton";
 import ErrorMessage from "./ErrorMessage";
 import DropdownMenu from "./DropdownMenu";
+import SearchResults from "./SearchResults";
 
 //this is our SearchBar component
 const SearchBar = ({ style, updateApiData }) => {
@@ -14,6 +15,7 @@ const SearchBar = ({ style, updateApiData }) => {
   const [error, setError] = useState(null); // Stores any errors encountered during search
   const [submitClicked, setSubmitClicked] = useState(false); // Indicates whether the submit button was clicked
   const [showDropdown, setShowDropdown] = useState(false); // Indicates whether the suggestions dropdown is visible
+  const [searchData, setSearchData] = useState(null);
   const [showResultGrid, setShowResultGrid] = useState(false); // Indicates whether the search results grid is visible
   const suggestionsContainerRef = useRef(null); // Create a reference to the suggestions container element to detect clicks outside it
   // define API keys and other constants
@@ -22,7 +24,7 @@ const SearchBar = ({ style, updateApiData }) => {
   const storeId = "6373"; //freshop store ID
   const token = process.env.REACT_APP_TOKEN; //freshop api token
   const fields = "id, name, price, cover_image"; //fields for Search API
-  const limit = 5; //maximum number of search results to return
+  const limit = 7; //maximum number of search results to return
   const relevance_sort = "asc";
   const render_id = "1701187538668";
 
@@ -95,6 +97,7 @@ const SearchBar = ({ style, updateApiData }) => {
   };
 
   //fetch search results from the Freshop API
+
   const SearchAPI = async (query) => {
     try {
       setLoading(true); //indicates loading state
@@ -103,15 +106,14 @@ const SearchBar = ({ style, updateApiData }) => {
       // const searchResponse = await fetch(
       //   `https://api.freshop.com/1/products?q=${query}&app_key=${appKey}&fields=${fields}&limit=${limit}&store_id=${storeId}&token=${token}`
       // );
-      // Construct the URL with optional parameters
-      const url = `https://api.freshop.com/1/products?q=${query}&app_key=${appKey}&fields=${fields}&limit=${limit}&store_id=${storeId}&token=${token}`;
 
+      const url = `https://api.freshop.com/1/products?q=${query}&app_key=${appKey}&fields=${fields}&limit=${limit}&store_id=${storeId}&token=${token}`;
       // Conditionally include optional parameters
       const params = new URLSearchParams({
         relevance_sort,
         render_id,
       });
-      //we use URLSearchParams so that we can
+      //we use URLSearchParams so that we can take ^ in one object
       const fullUrl = `${url}&${params.toString()}`;
 
       const searchResponse = await fetch(fullUrl);
@@ -120,16 +122,17 @@ const SearchBar = ({ style, updateApiData }) => {
       }
 
       const searchData = await searchResponse.json();
-
+      setSearchData(searchData);
       console.log("Search API Response:", searchData);
 
       if (searchData && searchData.results) {
-        //update the search results state
         updateSearchResults(searchData.results);
         // Call the updateApiData function to update the API data in the App.js state
         updateApiData(searchData);
+        // setSearchData(searchData);
       } else {
         updateSearchResults([]); //this clears the results if there isn't anything found
+        setSearchData(null);
       }
     } catch (error) {
       console.error("Error searching for products:", error.message);
@@ -140,15 +143,19 @@ const SearchBar = ({ style, updateApiData }) => {
   };
 
   //this is the debounc mechanism, do not include SearchSuggestionsAPI in [searchInput]
-  useEffect(() => {
-    const debounceTimer = setTimeout(() => {
-      if (searchInput.length > 0 && !submitClicked) {
-        SearchSuggestionsAPI(searchInput); //fetch suggestions if input is present and no submit occurred
-      }
-    }, 15);
+  useEffect(
+    () => {
+      const debounceTimer = setTimeout(() => {
+        if (searchInput.length > 0 && !submitClicked) {
+          SearchSuggestionsAPI(searchInput); //fetch suggestions if input is present and no submit occurred
+        }
+      }, 15);
 
-    return () => clearTimeout(debounceTimer);
-  }, [searchInput]);
+      return () => clearTimeout(debounceTimer);
+    },
+    [searchInput],
+    [!submitClicked]
+  );
 
   //trigger search api when submit clicked
   useEffect(() => {
@@ -169,6 +176,8 @@ const SearchBar = ({ style, updateApiData }) => {
         !suggestionsContainerRef.current.contains(e.target)
       ) {
         setShowDropdown(false); //hide dropdown if clicked outside its container
+      } else {
+        setShowDropdown(true);
       }
     };
 
@@ -197,14 +206,13 @@ const SearchBar = ({ style, updateApiData }) => {
 
         <SubmitButton
           onClick={handleSearchSubmit} //trigger search on submit button clicked
-          style={{ marginleft: "8px" }} //apply margin style
+          style={{ marginLeft: "2px" }} //apply margin style
         />
       </div>
 
       {showDropdown && (
         <DropdownMenu
           suggestionsQ={suggestionsQ} //pass suggested queries
-          suggestionsVariants={suggestionsVariants} // Pass suggested query variants
           onSelectSuggestion={handleSelectSuggestion} //pass suggested query variants
           style={{
             position: "absolute",
@@ -215,6 +223,14 @@ const SearchBar = ({ style, updateApiData }) => {
             borderRadius: "8px", //apply rounded corners for aesthetics
             left: "0",
           }}
+        />
+      )}
+
+      {/* Use SearchResults component to display search results */}
+      {showResultGrid && (
+        <SearchResults
+          results={searchData?.variants}
+          searchType={departmentId}
         />
       )}
 
