@@ -3,28 +3,27 @@ import SearchInput from "./SearchInput";
 import SubmitButton from "./SubmitButton";
 import ErrorMessage from "./ErrorMessage";
 import DropdownMenu from "./DropdownMenu";
-import SearchResults from "./SearchResults";
 
 //this is our SearchBar component
-const SearchBar = ({ style, updateApiData }) => {
+const SearchBar = ({ style }) => {
   const [searchInput, updateSearchInput] = useState(""); //stores current search input
-  const [suggestionsQ, updateSuggestionsQ] = useState([]); //stores the suggested queries from the API
-  const [suggestionsVariants, updateSuggestionsVariants] = useState([]); //stores the suggested query variants from the API
+  const [suggestionsQ, setSuggestionsQ] = useState([]); //stores the suggested queries from the API
+  const [suggestionsVariants, setSuggestionsVariants] = useState([]); //stores the suggested query variants from the API
   const [searchResults, updateSearchResults] = useState([]); //stores the search results from the API
   const [loading, setLoading] = useState(false); // Indicates whether a search is ongoing
   const [error, setError] = useState(null); // Stores any errors encountered during search
   const [submitClicked, setSubmitClicked] = useState(false); // Indicates whether the submit button was clicked
   const [showDropdown, setShowDropdown] = useState(false); // Indicates whether the suggestions dropdown is visible
   const [searchData, setSearchData] = useState(null);
-  const [showResultGrid, setShowResultGrid] = useState(false); // Indicates whether the search results grid is visible
+  const [searchResultsJSX, setSearchResultsJSX] = useState(null);
   const suggestionsContainerRef = useRef(null); // Create a reference to the suggestions container element to detect clicks outside it
   // define API keys and other constants
   const appKey = "family_fare"; //freshop application key
   const departmentId = "product"; //Optional department ID (e.g., 'produce')
   const storeId = "6373"; //freshop store ID
   const token = process.env.REACT_APP_TOKEN; //freshop api token
-  const fields = "id, name, price, cover_image"; //fields for Search API
-  const limit = 7; //maximum number of search results to return
+  const fields = "id, name, price"; //fields for Search API
+  const limit = 5; //maximum number of search results to return
   const relevance_sort = "asc";
   const render_id = "1701187538668";
 
@@ -40,9 +39,8 @@ const SearchBar = ({ style, updateApiData }) => {
   const handleSearchSubmit = () => {
     setSubmitClicked(true); //set submit flag
     //clear suggestions on submit for a cleaner UI
-    updateSuggestionsQ([]); //for q value in object
-    updateSuggestionsVariants([]); //for variants value in object
-    setShowResultGrid(true); //this SHOULD show the result grid
+    setSuggestionsQ([]); //for q value in object
+    setSuggestionsVariants([]); //for variants value in object
   };
 
   //handle selection of a suggested query
@@ -51,8 +49,8 @@ const SearchBar = ({ style, updateApiData }) => {
     setShowDropdown(false); //hide the suggestions dropdown
     setSubmitClicked(true); //trigger search
     // SearchAPI(selectedSuggestion); // Clear suggestions here if needed
-    updateSuggestionsQ([]);
-    updateSuggestionsVariants([]);
+    setSuggestionsQ([]);
+    setSuggestionsVariants([]);
   };
 
   //fetch suggestions from the Freshop API
@@ -78,15 +76,15 @@ const SearchBar = ({ style, updateApiData }) => {
       console.log("Search Suggestion API Response:", suggestionData);
 
       if (suggestionData?.q) {
-        updateSuggestionsQ(suggestionData.q); //update the suggestions state
+        setSuggestionsQ(suggestionData.q); //update the suggestions state
       } else {
-        updateSuggestionsQ([]); //clear suggestions if none found
+        setSuggestionsQ([]); //clear suggestions if none found
       }
 
       if (suggestionData?.variants) {
-        updateSuggestionsVariants(suggestionData.variants);
+        setSuggestionsVariants(suggestionData.variants);
       } else {
-        updateSuggestionsVariants([]);
+        setSuggestionsVariants([]);
       }
     } catch (error) {
       console.error("Error searching for suggestions:", error.message);
@@ -97,24 +95,20 @@ const SearchBar = ({ style, updateApiData }) => {
   };
 
   //fetch search results from the Freshop API
+  // ...
 
   const SearchAPI = async (query) => {
     try {
-      setLoading(true); //indicates loading state
-      setError(null); //this clears any previous errors
-
-      // const searchResponse = await fetch(
-      //   `https://api.freshop.com/1/products?q=${query}&app_key=${appKey}&fields=${fields}&limit=${limit}&store_id=${storeId}&token=${token}`
-      // );
+      console.log("Entering SearchAPI");
+      setLoading(true);
+      setError(null);
 
       const url = `https://api.freshop.com/1/products?q=${query}&app_key=${appKey}&fields=${fields}&limit=${limit}&store_id=${storeId}&token=${token}`;
-      // Conditionally include optional parameters
       const params = new URLSearchParams({
         relevance_sort,
         render_id,
       });
-      //we use URLSearchParams so that we can take ^ in one object
-      const fullUrl = `${url}&${params.toString()}`;
+      const fullUrl = `${url}&${params.toString}`;
 
       const searchResponse = await fetch(fullUrl);
       if (!searchResponse.ok) {
@@ -122,49 +116,53 @@ const SearchBar = ({ style, updateApiData }) => {
       }
 
       const searchData = await searchResponse.json();
-      setSearchData(searchData);
-      console.log("Search API Response:", searchData);
-
-      if (searchData && searchData.results) {
-        updateSearchResults(searchData.results);
-        // Call the updateApiData function to update the API data in the App.js state
-        updateApiData(searchData);
-        // setSearchData(searchData);
-      } else {
-        updateSearchResults([]); //this clears the results if there isn't anything found
-        setSearchData(null);
+      console.log("SearchAPI Response: ", searchData);
+      if (searchData && searchData.items) {
+        return searchData.items; // Return the items data for rendering in the component
       }
+      return [];
     } catch (error) {
       console.error("Error searching for products:", error.message);
       setError("Error searching for products");
     } finally {
-      setLoading(false); //clear loading state
+      setLoading(false);
     }
   };
 
+  // ...
+
   //this is the debounc mechanism, do not include SearchSuggestionsAPI in [searchInput]
-  useEffect(
-    () => {
-      const debounceTimer = setTimeout(() => {
-        if (searchInput.length > 0 && !submitClicked) {
-          SearchSuggestionsAPI(searchInput); //fetch suggestions if input is present and no submit occurred
-        }
-      }, 15);
-
-      return () => clearTimeout(debounceTimer);
-    },
-    [searchInput],
-    [!submitClicked]
-  );
-
-  //trigger search api when submit clicked
   useEffect(() => {
+    const debounceTimer = setTimeout(() => {
+      if (searchInput.length > 0 && !submitClicked) {
+        SearchSuggestionsAPI(searchInput); //fetch suggestions if input is present and no submit occurred
+      }
+    }, 15);
+
+    return () => clearTimeout(debounceTimer);
+  }, [searchInput]);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+
+        const itemsData = await SearchAPI(searchInput);
+        setSearchResultsJSX(itemsData);
+      } catch (error) {
+        console.error("Error rendering search results:", error.message);
+        setError("Error rendering search results");
+      } finally {
+        setLoading(false);
+      }
+    };
+
     if (submitClicked) {
-      SearchAPI(searchInput); //perform search when submit button is clicked
-      setSubmitClicked(false); //this just resets the submit flag after using it
-      //clear suggestions on submit here too
-      updateSuggestionsQ([]);
-      updateSuggestionsVariants([]);
+      fetchData();
+      setSubmitClicked(false);
+      setSuggestionsQ([]);
+      setSuggestionsVariants([]);
     }
   }, [submitClicked, searchInput]);
 
@@ -188,7 +186,9 @@ const SearchBar = ({ style, updateApiData }) => {
     };
   }, [suggestionsContainerRef]);
 
-  //this is where we RENDER THE SEARCH BAR COMPONENT
+  // ...
+
+  // Inside the return statement
   return (
     <div style={style}>
       <div
@@ -218,7 +218,7 @@ const SearchBar = ({ style, updateApiData }) => {
             position: "absolute",
             top: "100%", //position dropdown below search input
             width: "100%", //makes dropdown fill the width of the search input
-            background: "white", //set background color
+            backgroundColor: "white", //set background color
             boxShadow: "0 2px 5px rgba(0, 0, 0, 0.1)", //apply shadow for depth
             borderRadius: "8px", //apply rounded corners for aesthetics
             left: "0",
@@ -226,15 +226,26 @@ const SearchBar = ({ style, updateApiData }) => {
         />
       )}
 
-      {/* Use SearchResults component to display search results */}
-      {showResultGrid && (
-        <SearchResults
-          results={searchData?.variants}
-          searchType={departmentId}
-        />
-      )}
-
       {error && <ErrorMessage message={error} />}
+
+      {searchResultsJSX && (
+        <div>
+          {searchResultsJSX.map((item) => (
+            <div
+              key={item.id}
+              style={{
+                border: "1px solid #ccc",
+                padding: "10px",
+                margin: "10px",
+              }}
+            >
+              <p>ID: {item.id}</p>
+              <p>Name: {item.name}</p>
+              <p>Price: {item.price}</p>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 };

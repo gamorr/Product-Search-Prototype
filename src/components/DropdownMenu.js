@@ -33,7 +33,7 @@ const DropdownMenu = ({
     cursor: "pointer",
     borderRadius: "8px 8px 0 0",
     background: "white",
-    text: "white",
+    color: "black",
     width: "100%",
   };
   //render the dropdown menu

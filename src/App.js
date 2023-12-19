@@ -16,7 +16,6 @@ function App() {
             top: "75px",
             left: 0,
           }}
-          alt="Family Fare"
         />
         <p
           style={{
@@ -25,8 +24,8 @@ function App() {
             margin: "0",
             top: "80px",
             height: "35px",
-            color: "yellow",
-            backgroundColor: "black",
+            color: "black",
+            textAlign: "center",
           }}
         >
           Product Search

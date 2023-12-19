@@ -1,38 +1,28 @@
 .App {
   text-align: center;
 }
-
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
+/* common style for all screen sizes */
+body {
+  font-size: 16px;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
+/* query for smaller screens (e.g., iPhone 5/SE) */
+@media screen and (max-width: 320px) {
+  body {
+    font-size: 14px;
   }
 }
 
-.App-header {
-  background-color: #282c34;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: white;
-}
-
-.App-link {
-  color: #61dafb;
-}
-
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
+/* query for medium screens (e.g., iPhone 6/7/8) */
+@media screen and (min-width: 321px) and (max-width: 375px) {
+  body {
+    font-size: 16px;
   }
-  to {
-    transform: rotate(360deg);
+}
+
+/* query for larger screens (e.g., iPhone X and above) */
+@media screen and (min-width: 376px) {
+  body {
+    font-size: 18px;
   }
 }
