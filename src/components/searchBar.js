@@ -18,9 +18,9 @@ const SearchBar = ({ style }) => {
   const [searchResultsJSX, setSearchResultsJSX] = useState(null);
   const suggestionsContainerRef = useRef(null); // Create a reference to the suggestions container element to detect clicks outside it
   // define API keys and other constants
-  const appKey = "family_fare"; //freshop application key
-  const departmentId = "product"; //Optional department ID (e.g., 'produce')
-  const storeId = "6373"; //freshop store ID
+  const appKey = process.env.REACT_APP_APP_KEY; //freshop application key
+  const departmentId = process.env.REACT_APP_DEPARTMENT_ID; //Optional department ID (e.g., 'produce')
+  const storeId = process.env.REACT_APP_STORE_ID; //freshop store ID
   const token = process.env.REACT_APP_TOKEN; //freshop api token
   const fields = "id, name, price"; //fields for Search API
   const limit = 5; //maximum number of search results to return
@@ -192,8 +192,20 @@ const SearchBar = ({ style }) => {
   return (
     <div style={style}>
       <div
-        style={{ display: "flex", alignItems: "center", position: "relative" }}
+        style={{
+          display: "flex",
+          flexDirection: "row",
+          alignItems: "center",
+          position: "relative",
+        }}
       >
+        <div
+          style={{
+            display: "flex",
+            alignitems: "center",
+            position: "relative",
+          }}
+        ></div>
         <SearchInput
           value={searchInput}
           onChange={handleChange}
@@ -229,19 +241,44 @@ const SearchBar = ({ style }) => {
       {error && <ErrorMessage message={error} />}
 
       {searchResultsJSX && (
-        <div>
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "row",
+            flexWrap: "wrap",
+            justifyContent: "center",
+          }}
+        >
           {searchResultsJSX.map((item) => (
             <div
               key={item.id}
               style={{
-                border: "1px solid #ccc",
-                padding: "10px",
+                border: "2px solid black",
+                borderRadius: "8px",
+                padding: "15px",
                 margin: "10px",
+                display: "flex",
+                flexDirection: "row",
+                alignitems: "center",
+                backgroundColor: "white",
+                width: "300px",
               }}
             >
-              <p>ID: {item.id}</p>
-              <p>Name: {item.name}</p>
-              <p>Price: {item.price}</p>
+              <div style={{ marginRight: "15px" }}>
+                <p style={{ fontSize: "16px", fontWeight: "bold" }}>
+                  ID: {item.id}
+                </p>
+              </div>
+              <div style={{ marginRight: "15px" }}>
+                <p style={{ fontSize: "16px", fontWeight: "bold" }}>
+                  Name: {item.name}
+                </p>
+              </div>
+              <div style={{ marginRight: "10px" }}>
+                <p style={{ fontSize: "14px", fontWeight: "bold" }}>
+                  Price: {item.price}
+                </p>
+              </div>
             </div>
           ))}
         </div>
