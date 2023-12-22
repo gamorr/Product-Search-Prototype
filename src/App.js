@@ -10,10 +10,10 @@ function App() {
         <img
           src={family_fare_img}
           style={{
-            width: "300px",
+            width: "250px",
             height: "140px",
             position: "absolute",
-            top: "75px",
+            top: "10px",
             left: 0,
           }}
         />
@@ -33,7 +33,7 @@ function App() {
         <SearchBar
           style={{
             position: "absolute",
-            top: "125px",
+            top: "60px",
             left: "320px",
           }}
         />

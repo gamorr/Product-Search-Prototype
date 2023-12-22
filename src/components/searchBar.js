@@ -21,7 +21,7 @@ const SearchBar = ({ style }) => {
   const storeId = process.env.REACT_APP_STORE_ID; //freshop store ID
   const token = process.env.REACT_APP_TOKEN; //freshop api token
   const fields = process.env.REACT_APP_FIELDS; //fields for Search API
-  const limit = 6; //maximum number of search results to return
+  const limit = 12; //maximum number of search results to return
   const relevance_sort = process.env.REACT_APP_RELEVANCE_SORT;
   const render_id = process.env.REACT_APP_RENDER_ID;
 
@@ -93,7 +93,6 @@ const SearchBar = ({ style }) => {
   };
 
   //fetch search results from the Freshop API
-  // ...
 
   const SearchAPI = async (query) => {
     try {
@@ -244,10 +243,12 @@ const SearchBar = ({ style }) => {
       {searchResults && (
         <div
           style={{
-            display: "flex",
-            flexDirection: "row",
-            flexWrap: "wrap",
+            display: "grid",
+            gridTemplateColumns: "repeat(2, 1fr)", //creates 2 columns
+            gridTemplateRows: "repeat(6, 1fr)", //creates 3 rows
+            gap: "10px",
             justifyContent: "center",
+            marginTop: "175px",
           }}
         >
           {searchResults.map((item) => (
@@ -257,29 +258,56 @@ const SearchBar = ({ style }) => {
                 border: "2px solid black",
                 borderRadius: "8px",
                 padding: "15px",
-                margin: "10px",
-                display: "flex",
-                flexDirection: "column",
-                alignitems: "center",
+                position: "relative",
                 backgroundColor: "white",
-                width: "300px",
+                width: "200px",
               }}
             >
-              <div style={{ marginRight: "15px" }}>
-                <p style={{ fontSize: "16px", fontWeight: "bold" }}>
-                  Name: {item.name}
-                </p>
-              </div>
-              <div style={{ marginRight: "15px" }}>
-                <div style={{ marginRight: "10px" }}>
-                  <p style={{ fontSize: "14px", fontWeight: "bold" }}>
-                    Price: {item.price}
-                  </p>
-                </div>
+              <div
+                style={{
+                  marginBottom: "8px",
+                  height: "2.5",
+                  overflow: "hidden",
+                }}
+              >
                 <p
                   style={{
-                    fontSize: item.id.length > 8 ? "14px" : "16px",
+                    fontSize: "12px",
                     fontWeight: "bold",
+                    margin: 0,
+                    padding: 0,
+                    overflow: "hidden",
+                  }}
+                >
+                  {item.name}
+                </p>
+              </div>
+              <div style={{ marginBottom: "8px" }}>
+                <p
+                  style={{
+                    fontSize: "14px",
+                    fontWeight: "bold",
+                    margin: 0,
+                    padding: 0,
+                  }}
+                >
+                  Price: {item.price}
+                </p>
+              </div>
+              <div
+                style={{
+                  position: "absolute",
+                  bottom: "10px",
+                  width: "100%",
+                  textAlign: "center",
+                }}
+              >
+                <p
+                  style={{
+                    fontSize: "14px",
+                    fontWeight: "bold",
+                    margin: 0,
+                    padding: 0,
                   }}
                 >
                   ID: {item.id}
