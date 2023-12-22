@@ -9,13 +9,11 @@ const SearchBar = ({ style }) => {
   const [searchInput, updateSearchInput] = useState(""); //stores current search input
   const [suggestionsQ, setSuggestionsQ] = useState([]); //stores the suggested queries from the API
   const [suggestionsVariants, setSuggestionsVariants] = useState([]); //stores the suggested query variants from the API
-  const [searchResults, updateSearchResults] = useState([]); //stores the search results from the API
   const [loading, setLoading] = useState(false); // Indicates whether a search is ongoing
   const [error, setError] = useState(null); // Stores any errors encountered during search
   const [submitClicked, setSubmitClicked] = useState(false); // Indicates whether the submit button was clicked
   const [showDropdown, setShowDropdown] = useState(false); // Indicates whether the suggestions dropdown is visible
-  const [searchData, setSearchData] = useState(null);
-  const [searchResultsJSX, setSearchResultsJSX] = useState(null);
+  const [searchResults, setSearchResults] = useState(null);
   const suggestionsContainerRef = useRef(null); // Create a reference to the suggestions container element to detect clicks outside it
   // define API keys and other constants
   const appKey = process.env.REACT_APP_APP_KEY; //freshop application key
@@ -149,7 +147,7 @@ const SearchBar = ({ style }) => {
         setError(null);
 
         const itemsData = await SearchAPI(searchInput);
-        setSearchResultsJSX(itemsData);
+        setSearchResults(itemsData);
       } catch (error) {
         console.error("Error rendering search results:", error.message);
         setError("Error rendering search results");
@@ -243,7 +241,7 @@ const SearchBar = ({ style }) => {
 
       {error && <ErrorMessage message={error} />}
 
-      {searchResultsJSX && (
+      {searchResults && (
         <div
           style={{
             display: "flex",
@@ -252,7 +250,7 @@ const SearchBar = ({ style }) => {
             justifyContent: "center",
           }}
         >
-          {searchResultsJSX.map((item) => (
+          {searchResults.map((item) => (
             <div
               key={item.id}
               style={{
