@@ -20,10 +20,10 @@ const SearchBar = ({ style }) => {
   const departmentId = process.env.REACT_APP_DEPARTMENT_ID; //Optional department ID (e.g., 'produce')
   const storeId = process.env.REACT_APP_STORE_ID; //freshop store ID
   const token = process.env.REACT_APP_TOKEN; //freshop api token
-  const fields = "id, name, price"; //fields for Search API
-  const limit = 5; //maximum number of search results to return
-  const relevance_sort = "asc";
-  const render_id = "1701187538668";
+  const fields = process.env.REACT_APP_FIELDS; //fields for Search API
+  const limit = 6; //maximum number of search results to return
+  const relevance_sort = process.env.REACT_APP_RELEVANCE_SORT;
+  const render_id = process.env.REACT_APP_RENDER_ID;
 
   //handle changes in the search input field
   const handleChange = (e) => {
@@ -266,7 +266,12 @@ const SearchBar = ({ style }) => {
               }}
             >
               <div style={{ marginRight: "15px" }}>
-                <p style={{ fontSize: "16px", fontWeight: "bold" }}>
+                <p
+                  style={{
+                    fontSize: item.id.length > 8 ? "14px" : "16px",
+                    fontWeight: "bold",
+                  }}
+                >
                   ID: {item.id}
                 </p>
               </div>
