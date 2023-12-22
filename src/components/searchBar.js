@@ -259,13 +259,23 @@ const SearchBar = ({ style }) => {
                 padding: "15px",
                 margin: "10px",
                 display: "flex",
-                flexDirection: "row",
+                flexDirection: "column",
                 alignitems: "center",
                 backgroundColor: "white",
                 width: "300px",
               }}
             >
               <div style={{ marginRight: "15px" }}>
+                <p style={{ fontSize: "16px", fontWeight: "bold" }}>
+                  Name: {item.name}
+                </p>
+              </div>
+              <div style={{ marginRight: "15px" }}>
+                <div style={{ marginRight: "10px" }}>
+                  <p style={{ fontSize: "14px", fontWeight: "bold" }}>
+                    Price: {item.price}
+                  </p>
+                </div>
                 <p
                   style={{
                     fontSize: item.id.length > 8 ? "14px" : "16px",
@@ -273,16 +283,6 @@ const SearchBar = ({ style }) => {
                   }}
                 >
                   ID: {item.id}
-                </p>
-              </div>
-              <div style={{ marginRight: "15px" }}>
-                <p style={{ fontSize: "16px", fontWeight: "bold" }}>
-                  Name: {item.name}
-                </p>
-              </div>
-              <div style={{ marginRight: "10px" }}>
-                <p style={{ fontSize: "14px", fontWeight: "bold" }}>
-                  Price: {item.price}
                 </p>
               </div>
             </div>
