@@ -206,37 +206,40 @@ const SearchBar = ({ style }) => {
             position: "relative",
           }}
         ></div>
-        <SearchInput
-          value={searchInput}
-          onChange={handleChange}
-          onFocus={() => setShowDropdown(!!searchInput)}
-          onBlur={() => {
-            // Delay hiding the dropdown to allow time for the suggestion click event to trigger
-            setTimeout(() => setShowDropdown(false), 100);
-          }}
-        />
+        <div className="dropdown-container" style={{ position: "relative" }}>
+          <SearchInput
+            value={searchInput}
+            onChange={handleChange}
+            onFocus={() => setShowDropdown(!!searchInput)}
+            onBlur={() => {
+              // Delay hiding the dropdown to allow time for the suggestion click event to trigger
+              setTimeout(() => setShowDropdown(false), 100);
+            }}
+          />
 
-        <SubmitButton
-          onClick={handleSearchSubmit} //trigger search on submit button clicked
-          style={{ marginLeft: "2px" }} //apply margin style
-        />
+          <SubmitButton
+            onClick={handleSearchSubmit} //trigger search on submit button clicked
+            style={{ marginLeft: "2px" }} //apply margin style
+          />
+
+          {showDropdown && (
+            <DropdownMenu
+              suggestionsQ={suggestionsQ} //pass suggested queries
+              onSelectSuggestion={handleSelectSuggestion} //pass suggested query variants
+              style={{
+                position: "absolute",
+                top: "100%", //position dropdown below search input
+                width: "100%", //makes dropdown fill the width of the search input
+                backgroundColor: "white", //set background color
+                boxShadow: "0 2px 5px rgba(0, 0, 0, 0.1)", //apply shadow for depth
+                borderRadius: "8px", //apply rounded corners for aesthetics
+                left: "0",
+                zIndex: 1000, // Ensure the menu is above other elements
+              }}
+            />
+          )}
+        </div>
       </div>
-
-      {showDropdown && (
-        <DropdownMenu
-          suggestionsQ={suggestionsQ} //pass suggested queries
-          onSelectSuggestion={handleSelectSuggestion} //pass suggested query variants
-          style={{
-            position: "absolute",
-            top: "100%", //position dropdown below search input
-            width: "100%", //makes dropdown fill the width of the search input
-            backgroundColor: "white", //set background color
-            boxShadow: "0 2px 5px rgba(0, 0, 0, 0.1)", //apply shadow for depth
-            borderRadius: "8px", //apply rounded corners for aesthetics
-            left: "0",
-          }}
-        />
-      )}
 
       {error && <ErrorMessage message={error} />}
 

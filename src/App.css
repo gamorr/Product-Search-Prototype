@@ -6,6 +6,16 @@ body {
   font-size: 16px;
 }
 
+.DropdownMenu {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  z-index: 1000;
+  background-color: white;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+}
+
 /* query for smaller screens (e.g., iPhone 5/SE) */
 @media screen and (max-width: 320px) {
   body {
