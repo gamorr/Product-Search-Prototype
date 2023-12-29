@@ -1,7 +1,11 @@
-import { render, screen } from "@testing-library/react";
+import { render } from "@testing-library/react";
 import App from "./App";
-import React from "react";
+
+jest.mock("./family_fare_img.webp", () => ({
+  default: "data:image/webp;base64,",
+}));
 
 test("app renders correctly", () => {
-  render(<App />);
+  const { asFragment } = render(<App />);
+  expect(asFragment()).toMatchSnapshot();
 });

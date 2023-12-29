@@ -1,7 +1,3 @@
-# Getting Started with Create React App
-
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
-
 ## Available Scripts
 
 In the project directory, you can run:
@@ -9,62 +5,60 @@ In the project directory, you can run:
 ### `npm start`
 
 Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+Open [http://localhost:3000] to view it in your browser.
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+...
 
 ### `npm test`
 
 Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
 
-### `npm run build`
+...
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+## API Integration
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+### Search Suggestion API
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+Endpoint: [https://api.freshop.com/1/product_search_suggestions](https://api.freshop.com/1/product_search_suggestions)
 
-### `npm run eject`
+Parameters:
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+- app_key: Identifies the application (e.g., family_fare, vgs).
+- department_id: Filters suggestions by department.
+- q: The query term entered by the user.
+- store_id: Identifies the specific store.
+- token: Authentication token.
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+Expected Response: A list of search terms and variants based on the query. Example: For "bana", it suggests "bananas", "concord banana", etc.
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+Optional Parameters: department_id may be optional, depending on whether we want to filter suggestions by department.
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+### Search API
 
-## Learn More
+Endpoint: [https://api.freshop.com/1/products](https://api.freshop.com/1/products)
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+Parameters:
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+- app_key, store_id, token: Similar to the Search Suggestion API.
+- fields: Specifies the product details to be returned (e.g., id, name, price, etc.).
+- q: The search query term.
+- limit, sort, relevance_sort: Control the number of results and sorting.
 
-### Code Splitting
+Expected Response: Detailed information about products matching the query.
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+Optional Parameters: Many parameters like relevance_sort, render_id are likely optional.
 
-### Analyzing the Bundle Size
+## Implementation Details
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+- **Search Input & Button:** Implement a search input field with a submit button. When a user types a query and clicks the submit button, trigger the Search API.
 
-### Making a Progressive Web App
+- **Autocomplete Feature:** As the user types in the search input, dynamically fetch suggestions from the Search Suggestion API. Display these suggestions in a dropdown menu below the input field. Implement a debounce mechanism to limit API calls while typing.
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+- **Handling API Responses:**
 
-### Advanced Configuration
+  - For autocomplete, parse the q and variants arrays from the response and display them.
+  - For product search, handle the more complex structure, extracting relevant details like id, name, price, cover_image, etc., to display to the user.
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
+- **Error Handling:** Implement error handling for cases where the API does not return data or encounters an error.
 
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+- **UI Considerations:** Ensure a responsive and user-friendly interface. Consider how the search results and suggestions are displayed on different screen sizes.

@@ -1,5 +1,6 @@
-import React, { useState } from "react";
+import React from "react";
 import family_fare_img from "./__mocks__/family_fare_img.webp";
+
 import "./App.css";
 import SearchBar from "./components/SearchBar";
 
@@ -13,7 +14,7 @@ function App() {
             width: "250px",
             height: "140px",
             position: "absolute",
-            top: "10px",
+            top: "100px",
             left: 0,
           }}
         />

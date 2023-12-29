@@ -28,9 +28,6 @@
     ]
   },
   "jest": {
-    "moduleNameMapper": {
-      "\\.(svg)$": "<rootDir>/src/__mocks__/logo.svg"
-    },
     "testEnvironment": "jsdom"
   },
   "browserslist": {

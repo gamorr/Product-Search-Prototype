@@ -21,7 +21,7 @@ const SearchBar = ({ style }) => {
   const storeId = process.env.REACT_APP_STORE_ID; //freshop store ID
   const token = process.env.REACT_APP_TOKEN; //freshop api token
   const fields = process.env.REACT_APP_FIELDS; //fields for Search API
-  const limit = 12; //maximum number of search results to return
+  const limit = process.env.REACT_APP_LIMIT; //maximum number of search results to return
   const relevance_sort = process.env.REACT_APP_RELEVANCE_SORT;
   const render_id = process.env.REACT_APP_RENDER_ID;
 
@@ -244,8 +244,8 @@ const SearchBar = ({ style }) => {
         <div
           style={{
             display: "grid",
-            gridTemplateColumns: "repeat(2, 1fr)", //creates 2 columns
-            gridTemplateRows: "repeat(6, 1fr)", //creates 3 rows
+            gridTemplateColumns: "repeat(3, 1fr)", //creates 2 columns
+            gridTemplateRows: "repeat(4, 1fr)", //creates 3 rows
             gap: "10px",
             justifyContent: "center",
             marginTop: "175px",

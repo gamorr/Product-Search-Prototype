@@ -25,7 +25,7 @@ const DropdownMenu = ({
     return () => {
       document.removeEventListener("click", handleClickOutside);
     };
-  }, []); // Empty dependency array to run the effect only once when the component mounts
+  }, [handleClickOutside]); // Empty dependency array to run the effect only once when the component mounts
 
   //define the base style for each suggestion
   const suggestionStyle = {
