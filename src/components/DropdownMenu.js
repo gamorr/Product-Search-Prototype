@@ -38,7 +38,7 @@ const DropdownMenu = ({
   };
   //render the dropdown menu
   return (
-    <div style={{ ...style, borderRadius: "8px" }}>
+    <div style={{ ...style, borderRadius: "8px" }} role="listbox">
       {suggestionsQ.map((suggestion, index) => (
         <div
           key={index}

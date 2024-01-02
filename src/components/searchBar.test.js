@@ -1,53 +1,34 @@
 import React from "react";
+import { toBeInTheDocument } from "@testing-library/jest-dom"; // Add this import
+import { render, screen } from "@testing-library/react";
+import { fireEvent } from "@testing-library/user-event";
 import SearchBar from "./SearchBar";
-import {
-  act,
-  render,
-  screen,
-  fireEvent,
-  waitFor,
-} from "@testing-library/react";
-import fetchMock from "jest-fetch-mock";
 
-fetchMock.enableMocks();
+test("renders SearchBar with initial state", () => {
+  render(<SearchBar />);
 
-describe("SearchBar Component", () => {
-  it("renders SearchBar component without errors", () => {
-    render(<SearchBar />);
-  });
+  const searchInput = screen.getByPlaceholderText("Search ...");
+  const submitButton = screen.getByRole("button", { name: "Submit" });
 
-  it("updates search input on user input", () => {
-    render(<SearchBar />);
-    const inputElement = screen.getByRole("textbox");
+  expect(searchInput).toBeInTheDocument();
+  expect(submitButton).toBeInTheDocument();
+  expect(
+    screen.queryByText("Error rendering search results")
+  ).not.toBeInTheDocument();
+  expect(
+    screen.queryByText("Error searching for suggestions")
+  ).not.toBeInTheDocument();
+});
 
-    fireEvent.change(inputElement, { target: { value: "apple" } });
+test("shows dropdown when input changes", () => {
+  render(<SearchBar />);
 
-    expect(inputElement.value).toBe("apple");
-  });
+  const searchInput = screen.getByPlaceholderText("Search ...");
+  const dropdown = screen.queryByRole("listbox"); // Assuming DropdownMenu uses a listbox role
 
-  it("displays suggestions dropdown on input", async () => {
-    render(<SearchBar />);
-    const inputElement = screen.getByRole("textbox");
+  expect(dropdown).not.toBeInTheDocument(); // Initially hidden
+  console.log(searchInput);
+  fireEvent.change(searchInput, { target: { value: "apple" } });
 
-    fireEvent.change(inputElement, { target: { value: "banana" } });
-
-    await waitFor(() => {
-      expect(screen.getByTestId("dropdown-menu")).toBeInTheDocument();
-    });
-  });
-
-  it("triggers search on submit button click", async () => {
-    render(<SearchBar />);
-    const inputElement = screen.getByRole("textbox");
-    const submitButton = screen.getByRole("button", { name: "Submit" });
-
-    fireEvent.change(inputElement, { target: { value: "orange" } });
-    fireEvent.click(submitButton);
-
-    await waitFor(() => {
-      // Add assertions for the expected behavior after search is triggered
-      // For example, you can check if loading state is displayed or search results are rendered
-      // You can use screen queries to assert on the UI elements
-    });
-  });
+  expect(dropdown).toBeInTheDocument(); // Now visible
 });

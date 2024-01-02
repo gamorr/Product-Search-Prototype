@@ -1,23 +1,11 @@
 import React from "react";
-import family_fare_img from "./__mocks__/family_fare_img.webp";
-
-import "./App.css";
 import SearchBar from "./components/SearchBar";
+import "./App.css";
 
 function App() {
   return (
     <div className="App">
       <div>
-        <img
-          src={family_fare_img}
-          style={{
-            width: "250px",
-            height: "140px",
-            position: "absolute",
-            top: "100px",
-            left: 0,
-          }}
-        />
         <p
           style={{
             fontSize: "24px",
@@ -35,7 +23,7 @@ function App() {
           style={{
             position: "absolute",
             top: "60px",
-            left: "320px",
+            left: "115px",
           }}
         />
       </div>

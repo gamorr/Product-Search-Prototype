@@ -5,7 +5,7 @@ import ErrorMessage from "./ErrorMessage";
 import DropdownMenu from "./DropdownMenu";
 
 //this is our SearchBar component
-const SearchBar = ({ style }) => {
+const SearchBar = ({ style, searchResultsStyle }) => {
   const [searchInput, updateSearchInput] = useState(""); //stores current search input
   const [suggestionsQ, setSuggestionsQ] = useState([]); //stores the suggested queries from the API
   const [suggestionsVariants, setSuggestionsVariants] = useState([]); //stores the suggested query variants from the API
@@ -108,11 +108,15 @@ const SearchBar = ({ style }) => {
       const fullUrl = `${url}&${params.toString}`;
 
       const searchResponse = await fetch(fullUrl);
+
       if (!searchResponse.ok) {
         throw new Error(`Search response NOT good: ${searchResponse.status}`);
       }
-
-      const searchData = await searchResponse.json();
+      const responseBody = await searchResponse.text();
+      if (!responseBody) {
+        throw new Error("Empty response body");
+      }
+      const searchData = JSON.parse(responseBody);
       console.log("SearchAPI Response: ", searchData);
       if (searchData && searchData.items) {
         return searchData.items; // Return the items data for rendering in the component
@@ -128,7 +132,7 @@ const SearchBar = ({ style }) => {
 
   // ...
 
-  //this is the debounc mechanism, do not include SearchSuggestionsAPI in [searchInput]
+  //this is the debounce mechanism, do not include SearchSuggestionsAPI in [searchInput]
   useEffect(() => {
     const debounceTimer = setTimeout(() => {
       if (searchInput.length > 0 && !submitClicked) {
@@ -216,7 +220,7 @@ const SearchBar = ({ style }) => {
 
           <SubmitButton
             onClick={handleSearchSubmit} //trigger search on submit button clicked
-            style={{ marginLeft: "2px" }} //apply margin style
+            style={{}} //apply margin style
           />
 
           {showDropdown && (
@@ -242,13 +246,15 @@ const SearchBar = ({ style }) => {
 
       {searchResults && (
         <div
+          className="search-results-container"
           style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(3, 1fr)", //creates 2 columns
-            gridTemplateRows: "repeat(4, 1fr)", //creates 3 rows
-            gap: "10px",
-            justifyContent: "center",
-            marginTop: "175px",
+            // display: "grid",
+            // gridTemplateColumns: "repeat(3, 1fr)", //creates 2 columns
+            // gridTemplateRows: "repeat(4, 1fr)", //creates 3 rows
+            // gap: "10px",
+            // justifyContent: "center",
+            // marginTop: "175px",
+            searchResultsStyle,
           }}
         >
           {searchResults.map((item) => (
@@ -287,7 +293,7 @@ const SearchBar = ({ style }) => {
                   style={{
                     fontSize: "14px",
                     fontWeight: "bold",
-                    margin: 0,
+                    margin: 40,
                     padding: 0,
                   }}
                 >
@@ -298,13 +304,14 @@ const SearchBar = ({ style }) => {
                 style={{
                   position: "absolute",
                   bottom: "10px",
+                  left: "15px",
                   width: "100%",
-                  textAlign: "center",
+                  textAlign: "left",
                 }}
               >
                 <p
                   style={{
-                    fontSize: "14px",
+                    fontSize: item.id.length > 10 ? "11px" : "13px",
                     fontWeight: "bold",
                     margin: 0,
                     padding: 0,
