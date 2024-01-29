@@ -1,5 +1,11 @@
+// App.js
 import React from "react";
 import SearchBar from "./components/SearchBar";
+import ShoppingList from "./components/ShoppingList";
+import {
+  searchBarStyle,
+  shoppingListContainerStyle,
+} from "./components/styles";
 import "./App.css";
 
 function App() {
@@ -8,24 +14,21 @@ function App() {
       <div>
         <p
           style={{
-            fontSize: "24px",
+            fontSize: "23px",
             fontWeight: "bold",
-            margin: "0",
-            top: "80px",
-            height: "35px",
+            height: "20px",
             color: "black",
             textAlign: "center",
           }}
         >
           Product Search
         </p>
-        <SearchBar
-          style={{
-            position: "absolute",
-            top: "60px",
-            left: "115px",
-          }}
-        />
+        <div data-testid="search-bar">
+          <SearchBar style={searchBarStyle} />
+        </div>
+      </div>
+      <div style={shoppingListContainerStyle}>
+        <ShoppingList />
       </div>
     </div>
   );

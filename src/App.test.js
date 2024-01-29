@@ -15,7 +15,7 @@ test("app renders correctly", () => {
   const headingElement = screen.getByText("Product Search");
   expect(headingElement).toBeInTheDocument();
   expect(headingElement).toHaveStyle({
-    fontSize: "24px",
+    fontSize: "23px",
     fontWeight: "bold",
     color: "black",
     textAlign: "center",
@@ -26,8 +26,8 @@ test("app renders correctly", () => {
   expect(searchBarElement).toBeInTheDocument();
   expect(searchBarElement).toHaveStyle({
     position: "absolute",
+    left: "60px",
     top: "60px",
-    left: "320px",
   });
 });
 
@@ -37,5 +37,5 @@ test("CSS content is mocked", () => {
   const cssContent = require("./App.css");
 
   // Check if the default export is the mocked content
-  expect(cssContent).toBe("mocked-css-content");
+  expect(cssContent.default).toBe("mocked-css-content");
 });

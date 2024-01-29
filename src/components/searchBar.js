@@ -5,7 +5,7 @@ import ErrorMessage from "./ErrorMessage";
 import DropdownMenu from "./DropdownMenu";
 
 //this is our SearchBar component
-const SearchBar = ({ style, searchResultsStyle }) => {
+const SearchBar = ({ style }) => {
   const [searchInput, updateSearchInput] = useState(""); //stores current search input
   const [suggestionsQ, setSuggestionsQ] = useState([]); //stores the suggested queries from the API
   const [suggestionsVariants, setSuggestionsVariants] = useState([]); //stores the suggested query variants from the API
@@ -14,7 +14,8 @@ const SearchBar = ({ style, searchResultsStyle }) => {
   const [submitClicked, setSubmitClicked] = useState(false); // Indicates whether the submit button was clicked
   const [showDropdown, setShowDropdown] = useState(false); // Indicates whether the suggestions dropdown is visible
   const [searchResults, setSearchResults] = useState(null);
-  const suggestionsContainerRef = useRef(null); // Create a reference to the suggestions container element to detect clicks outside it
+  const suggestionsContainerRef = useRef(null);
+  const searchInputRef = useRef(null); // Create a reference to the suggestions container element to detect clicks outside it
   // define API keys and other constants
   const appKey = process.env.REACT_APP_APP_KEY; //freshop application key
   const departmentId = process.env.REACT_APP_DEPARTMENT_ID; //Optional department ID (e.g., 'produce')
@@ -38,7 +39,7 @@ const SearchBar = ({ style, searchResultsStyle }) => {
     setSubmitClicked(true); //set submit flag
     //clear suggestions on submit for a cleaner UI
     setSuggestionsQ([]); //for q value in object
-    setSuggestionsVariants([]); //for variants value in object
+    setSuggestionsVariants([suggestionsVariants]); //for variants value in object
   };
 
   //handle selection of a suggested query
@@ -48,9 +49,70 @@ const SearchBar = ({ style, searchResultsStyle }) => {
     setSubmitClicked(true); //trigger search
     // SearchAPI(selectedSuggestion); // Clear suggestions here if needed
     setSuggestionsQ([]);
-    setSuggestionsVariants([]);
+    setSuggestionsVariants([suggestionsVariants]);
   };
 
+  // Function to construct image URLs
+  const getImageUrls = (item) => {
+    const baseImageUrl = "https://images.freshop.com/";
+
+    // Example for cover image
+    const coverImageUrl = `${baseImageUrl}${item.cover_image}_large.png`;
+
+    // Example for images array (assuming it's an array of image identifiers)
+    const imageUrls = item.images.map((imageId) => {
+      return `${baseImageUrl}${imageId}_large.png`;
+    });
+
+    return { coverImageUrl, imageUrls };
+  };
+
+  // Example function to handle image upload
+  const uploadProductImages = async (item) => {
+    try {
+      const appKey = process.env.REACT_APP_APP_KEY;
+      const appSecret = process.env.REACT_APP_APP_SECRET;
+      const storeId = process.env.REACT_APP_STORE_ID;
+      const upc = item.upc; // Assuming upc is present in the item object
+      const upcHasCheckDigit = true; // You may need to adjust this based on your data
+
+      // Construct the JSON array containing image data
+      const imageData = item.images.map((imageId, index) => {
+        return {
+          sequence: index,
+          source_url: `https://images.freshop.com/${imageId}_large.png`,
+        };
+      });
+
+      // Make the POST request to upload images
+      const uploadResponse = await fetch(
+        `https://api.freshop.com/1/product_slices/create`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            app_key: appKey,
+            app_secret: appSecret,
+            store_id: storeId,
+            upc: upc,
+            upc_has_check_digit: upcHasCheckDigit,
+            images: imageData,
+          }),
+        }
+      );
+
+      if (!uploadResponse.ok) {
+        throw new Error(`Image upload failed: ${uploadResponse.status}`);
+      }
+
+      const uploadData = await uploadResponse.json();
+      console.log("Image Upload Response:", uploadData);
+    } catch (error) {
+      console.error("Error uploading product images:", error.message);
+    }
+  };
   //fetch suggestions from the Freshop API
   const SearchSuggestionsAPI = async (query) => {
     try {
@@ -88,7 +150,7 @@ const SearchBar = ({ style, searchResultsStyle }) => {
       console.error("Error searching for suggestions:", error.message);
       setError("Error searching for suggestions");
     } finally {
-      setLoading(false); //this will clear the loading state
+      setLoading(loading); //this will clear the loading state
     }
   };
 
@@ -101,6 +163,7 @@ const SearchBar = ({ style, searchResultsStyle }) => {
       setError(null);
 
       const url = `https://api.freshop.com/1/products?q=${query}&app_key=${appKey}&fields=${fields}&limit=${limit}&store_id=${storeId}&token=${token}`;
+
       const params = new URLSearchParams({
         relevance_sort,
         render_id,
@@ -112,15 +175,16 @@ const SearchBar = ({ style, searchResultsStyle }) => {
       if (!searchResponse.ok) {
         throw new Error(`Search response NOT good: ${searchResponse.status}`);
       }
-      const responseBody = await searchResponse.text();
-      if (!responseBody) {
-        throw new Error("Empty response body");
-      }
-      const searchData = JSON.parse(responseBody);
-      console.log("SearchAPI Response: ", searchData);
+
+      const searchData = await searchResponse.json();
+
       if (searchData && searchData.items) {
-        return searchData.items; // Return the items data for rendering in the component
+        return searchData.items.map((item) => ({
+          ...item,
+          images: item.images || [], // Ensure images property exists
+        }));
       }
+
       return [];
     } catch (error) {
       console.error("Error searching for products:", error.message);
@@ -130,12 +194,11 @@ const SearchBar = ({ style, searchResultsStyle }) => {
     }
   };
 
-  // ...
-
-  //this is the debounce mechanism, do not include SearchSuggestionsAPI in [searchInput]
+  //this is our debounce mechanism, do not include SearchSuggestionsAPI next to [searchInput]
   useEffect(() => {
     const debounceTimer = setTimeout(() => {
       if (searchInput.length > 0 && !submitClicked) {
+        //handles only changing the input not submit button
         SearchSuggestionsAPI(searchInput); //fetch suggestions if input is present and no submit occurred
       }
     }, 15);
@@ -143,25 +206,39 @@ const SearchBar = ({ style, searchResultsStyle }) => {
     return () => clearTimeout(debounceTimer);
   }, [searchInput]);
 
+  // useEffect to handle fetching data when submitClicked or searchInput changes
   useEffect(() => {
     const fetchData = async () => {
       try {
+        // Set loading state to true to indicate ongoing data fetching
         setLoading(true);
+        // Clear any previous errors
         setError(null);
+        // Call the uploadProductImages function to upload images
+        const upc = "yourProductUPC"; // Replace with the actual UPC
+        const imageUrls = ["url1", "url2"]; // Replace with the actual image URLs
+        await uploadProductImages(upc, imageUrls);
 
+        // Call the SearchAPI function to fetch search results based on the search input
         const itemsData = await SearchAPI(searchInput);
+        // Set the fetched data to the searchResults state
         setSearchResults(itemsData);
       } catch (error) {
         console.error("Error rendering search results:", error.message);
         setError("Error rendering search results");
       } finally {
+        // Set loading state to false to indicate the end of data fetching, regardless of success or failure
         setLoading(false);
       }
     };
 
+    // Check if submitClicked is true, indicating that the submit button was clicked
     if (submitClicked) {
+      // Call the fetchData function to initiate data fetching
       fetchData();
+      // Reset submitClicked to false to prevent repeated fetching
       setSubmitClicked(false);
+      // Clear suggestionsQ and suggestionsVariants to reset the suggestions state
       setSuggestionsQ([]);
       setSuggestionsVariants([]);
     }
@@ -171,6 +248,8 @@ const SearchBar = ({ style, searchResultsStyle }) => {
   useEffect(() => {
     const handleDocumentClick = (e) => {
       if (
+        searchInputRef.current &&
+        !searchInputRef.current.contains(e.target) &&
         suggestionsContainerRef.current &&
         !suggestionsContainerRef.current.contains(e.target)
       ) {
@@ -180,14 +259,28 @@ const SearchBar = ({ style, searchResultsStyle }) => {
       }
     };
 
-    document.addEventListener("click", handleDocumentClick);
-
-    return () => {
-      document.removeEventListener("click", handleDocumentClick);
+    const handleEscKey = (e) => {
+      // this is so I can get rid of the dropdown menu when pressing Esc
+      if (e.key === "Escape") {
+        setShowDropdown(false);
+      }
     };
-  }, [suggestionsContainerRef]);
+    document.addEventListener("mousedown", handleDocumentClick); //listen for click
+    document.addEventListener("keydown", handleEscKey); //Listen for the ESC key
+    return () => {
+      document.removeEventListener("mousedown", handleDocumentClick);
+      document.removeEventListener("keydown", handleEscKey);
+    };
+  }, [suggestionsContainerRef, searchInputRef]);
 
-  // ...
+  const searchInputStyle = {
+    width: "100%",
+    marginRight: "2px",
+  };
+
+  const submitButtonStyle = {
+    marginLeft: "2px",
+  };
 
   // Inside the return statement
   return (
@@ -201,13 +294,13 @@ const SearchBar = ({ style, searchResultsStyle }) => {
         }}
       >
         <div
+          className="dropdown-container"
           style={{
-            display: "flex",
-            alignitems: "center",
             position: "relative",
+            display: "flex",
+            alignItems: "center",
           }}
-        ></div>
-        <div className="dropdown-container" style={{ position: "relative" }}>
+        >
           <SearchInput
             value={searchInput}
             onChange={handleChange}
@@ -216,11 +309,12 @@ const SearchBar = ({ style, searchResultsStyle }) => {
               // Delay hiding the dropdown to allow time for the suggestion click event to trigger
               setTimeout(() => setShowDropdown(false), 100);
             }}
+            style={searchInputStyle}
           />
 
           <SubmitButton
             onClick={handleSearchSubmit} //trigger search on submit button clicked
-            style={{}} //apply margin style
+            style={submitButtonStyle} //apply margin style
           />
 
           {showDropdown && (
@@ -230,12 +324,11 @@ const SearchBar = ({ style, searchResultsStyle }) => {
               style={{
                 position: "absolute",
                 top: "100%", //position dropdown below search input
-                width: "100%", //makes dropdown fill the width of the search input
+                width: "72%", //makes dropdown fill the width of the search input
                 backgroundColor: "white", //set background color
-                boxShadow: "0 2px 5px rgba(0, 0, 0, 0.1)", //apply shadow for depth
-                borderRadius: "8px", //apply rounded corners for aesthetics
-                left: "0",
-                zIndex: 1000, // Ensure the menu is above other elements
+                boxShadow: "0 2px 5px rgba(0, 0, 0, 1.8)", //apply shadow for depth
+                borderRadius: "68px", //apply rounded corners for aesthetics
+                zIndex: 1,
               }}
             />
           )}
@@ -248,58 +341,53 @@ const SearchBar = ({ style, searchResultsStyle }) => {
         <div
           className="search-results-container"
           style={{
-            // display: "grid",
-            // gridTemplateColumns: "repeat(3, 1fr)", //creates 2 columns
-            // gridTemplateRows: "repeat(4, 1fr)", //creates 3 rows
-            // gap: "10px",
-            // justifyContent: "center",
-            // marginTop: "175px",
-            searchResultsStyle,
+            display: "grid",
+            gridTemplateColumns: "repeat(2, calc(50% - 10px))", // Adjust the column widths marginTop: "60px",
+            marginTop: "40px",
+            marginLeft: "-30px",
+            gap: "5px 15px",
           }}
         >
           {searchResults.map((item) => (
             <div
               key={item.id}
+              className="search-results-item"
               style={{
-                border: "2px solid black",
-                borderRadius: "8px",
-                padding: "15px",
+                boxShadow: "0 2px 5px rgba(0, 0, 0, 0.8)",
+                borderRadius: "18px",
+                padding: "9px",
                 position: "relative",
                 backgroundColor: "white",
-                width: "200px",
+                marginBottom: "20px",
               }}
             >
               <div
                 style={{
-                  marginBottom: "8px",
-                  height: "2.5",
-                  overflow: "hidden",
+                  marginBottom: "105px", // Adjusted height for text
                 }}
               >
                 <p
                   style={{
-                    fontSize: "12px",
+                    fontSize: "10px",
                     fontWeight: "bold",
-                    margin: 0,
-                    padding: 0,
                     overflow: "hidden",
                   }}
                 >
                   {item.name}
                 </p>
               </div>
-              <div style={{ marginBottom: "8px" }}>
-                <p
+              {item.images.map((image, index) => (
+                <img
+                  key={index}
+                  src={`https://images.freshop.com/${image.source_url}_small.png`}
+                  alt={`Product ${index + 1}`}
                   style={{
-                    fontSize: "14px",
-                    fontWeight: "bold",
-                    margin: 40,
-                    padding: 0,
+                    width: "100%",
+                    height: "auto",
+                    marginBottom: "10px",
                   }}
-                >
-                  Price: {item.price}
-                </p>
-              </div>
+                />
+              ))}
               <div
                 style={{
                   position: "absolute",
@@ -311,13 +399,31 @@ const SearchBar = ({ style, searchResultsStyle }) => {
               >
                 <p
                   style={{
-                    fontSize: item.id.length > 10 ? "11px" : "13px",
+                    fontSize: "7px",
                     fontWeight: "bold",
-                    margin: 0,
-                    padding: 0,
                   }}
                 >
                   ID: {item.id}
+                </p>
+              </div>
+              <div
+                style={{
+                  position: "absolute",
+                  bottom: "10px",
+                  textAlign: "left",
+                  left: "50%",
+                  transform: "translateX(-50%)",
+                }}
+              >
+                <p
+                  style={{
+                    fontSize: "13px",
+                    fontWeight: "bolder",
+                    marginBottom: "30px",
+                    color: "darkred",
+                  }}
+                >
+                  {item.price}
                 </p>
               </div>
             </div>

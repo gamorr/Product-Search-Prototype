@@ -29,9 +29,9 @@ const DropdownMenu = ({
 
   //define the base style for each suggestion
   const suggestionStyle = {
-    padding: "5px",
+    padding: "6px",
     cursor: "pointer",
-    borderRadius: "8px 8px 0 0",
+    // borderRadius: "3px 3px 0 0",
     background: "white",
     color: "black",
     width: "100%",

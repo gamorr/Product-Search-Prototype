@@ -3,63 +3,82 @@ body {
   font-size: 16px;
 }
 
-/* Styles for the dropdown container */
-.dropdown-container {
-  position: absolute;
-  top: 100%;
-  left: 0;
-  z-index: 1000;
-  background-color: white;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-  border-radius: 8px;
-}
-
 /* Styles for smaller screens (e.g., iPhone 5/SE) */
-@media screen and (max-width: 320px) {
+@media screen and (max-width: 430px) {
   body {
     font-size: 14px;
   }
 
-  .dropdown-container {
-    width: 100%; /* Make the dropdown container full-width on smaller screens */
+  .search-input {
+    width: 60%; /* Adjust the width for smaller screens */
   }
 
-  .search-results-container {
-    grid-template-columns: repeat(2, 1fr); /* Two columns for smaller screens */
-    gap: 10px; /* Add some gap between grid items */
-    grid-template-rows: repeat(4, auto); /* Four rows */
-    margin-top: 20px;
-  }
-}
-
-/* Styles for medium screens (e.g., iPhone 6/7/8) */
-@media screen and (min-width: 321px) and (max-width: 375px) {
-  body {
-    font-size: 16px;
+  .submit-button {
+    padding: 8px 12px; /* Adjust the padding for smaller screens */
+    margin-right: 3px; /* Adjust margin for smaller screens */
   }
 
-  .dropdown-container {
-    width: 100%; /* Make the dropdown container full-width on medium screens */
-  }
-
-  .search-results-container {
-    grid-template-columns: repeat(2, 1fr); /* Two columns for medium screens */
-    gap: 10px; /* Add some gap between grid items */
-    grid-template-rows: repeat(4, auto); /* Four rows */
-    margin-top: 20px;
+  /* Adjustments for search-results-item on smaller screens */
+  .search-results-item {
+    width: 130px; /* Adjust the width for smaller screens */
+    margin-top: -20px;
+    max-width: none; /* Reset max-width for smaller screens if necessary */
   }
 }
 
-/* Styles for larger screens (e.g., iPhone X and above) */
-@media screen and (min-width: 376px) {
+@media screen and (max-width: 370px) {
+  .search-results-container {
+    margin-left: 210px;
+  }
+  .search-results-item {
+    margin-bottom: 100px;
+  }
+}
+/* Styles for medium-sized screens (e.g., tablets) */
+@media screen and (min-width: 431px) and (max-width: 679px) {
+  .search-input {
+    width: 100%; /* Adjust the width for medium-sized screens */
+    max-width: none; /* Reset max-width for medium-sized screens */
+  }
+
+  .submit-button {
+    margin-left: 8px; /* Adjust margin to keep the submit button on the right */
+  }
+}
+
+/* Styles for larger screens (e.g., iPad and above) */
+@media screen and (min-width: 680px) and (max-width: 809px) {
   body {
     font-size: 18px;
   }
 
-  .search-results-container {
-    grid-template-columns: repeat(2, 1fr); /* Two columns for larger screens */
-    gap: 10px; /* Add some gap between grid items */
-    grid-template-rows: repeat(4, auto); /* Four rows */
+  .submit-button {
+    padding: 12px 16px; /* Adjust the padding for larger screens */
+    margin-right: 12px; /* Adjust margin for larger screens */
+  }
+}
+/* New media query for screens larger than 800px */
+@media screen and (min-width: 800px) {
+  .submit-button {
+    margin-left: 8px; /* Adjust margin to keep the submit button on the right */
+  }
+}
+@media screen and (min-width: 810px) {
+  .search-results-item {
+    width: 200px; /* Adjust the width for screens 810px and up */
+    box-sizing: border-box; /* Include padding and border in the width calculation */
     margin-top: 20px;
+  }
+
+  .search-input {
+    width: 310px; /* Adjust the width for medium-sized screens */
+    max-width: none; /* Reset max-width for medium-sized screens */
+  }
+}
+
+/* Styles for very large screens (e.g., desktops) */
+@media screen and (min-width: 1200px) {
+  .search-results-item {
+    width: 400px; /* Adjust the width for very large screens */
   }
 }
