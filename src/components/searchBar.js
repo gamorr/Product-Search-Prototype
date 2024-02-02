@@ -3,6 +3,8 @@ import SearchInput from "./SearchInput";
 import SubmitButton from "./SubmitButton";
 import ErrorMessage from "./ErrorMessage";
 import DropdownMenu from "./DropdownMenu";
+import ShoppingList from "./ShoppingList";
+import axios from "axios";
 
 //this is our SearchBar component
 const SearchBar = ({ style }) => {
@@ -52,28 +54,17 @@ const SearchBar = ({ style }) => {
     setSuggestionsVariants([suggestionsVariants]);
   };
 
-  // Function to construct image URLs
-  const getImageUrls = (item) => {
-    const baseImageUrl = "https://images.freshop.com/";
-
-    // Example for cover image
-    const coverImageUrl = `${baseImageUrl}${item.cover_image}_large.png`;
-
-    // Example for images array (assuming it's an array of image identifiers)
-    const imageUrls = item.images.map((imageId) => {
-      return `${baseImageUrl}${imageId}_large.png`;
-    });
-
-    return { coverImageUrl, imageUrls };
-  };
-
   // Example function to handle image upload
   const uploadProductImages = async (item) => {
     try {
+      if (!item || !item.images) {
+        throw new Error("Invalid item or item.images is undefined");
+      }
+
       const appKey = process.env.REACT_APP_APP_KEY;
       const appSecret = process.env.REACT_APP_APP_SECRET;
       const storeId = process.env.REACT_APP_STORE_ID;
-      const upc = item.upc; // Assuming upc is present in the item object
+      const upc = "4011"; // Assuming upc is present in the item object
       const upcHasCheckDigit = true; // You may need to adjust this based on your data
 
       // Construct the JSON array containing image data
@@ -113,6 +104,7 @@ const SearchBar = ({ style }) => {
       console.error("Error uploading product images:", error.message);
     }
   };
+
   //fetch suggestions from the Freshop API
   const SearchSuggestionsAPI = async (query) => {
     try {
@@ -168,7 +160,7 @@ const SearchBar = ({ style }) => {
         relevance_sort,
         render_id,
       });
-      const fullUrl = `${url}&${params.toString}`;
+      const fullUrl = `${url}&${params.toString()}`;
 
       const searchResponse = await fetch(fullUrl);
 
@@ -177,12 +169,17 @@ const SearchBar = ({ style }) => {
       }
 
       const searchData = await searchResponse.json();
-
+      console.log("SearchAPI Response: ", searchData);
       if (searchData && searchData.items) {
-        return searchData.items.map((item) => ({
-          ...item,
-          images: item.images || [], // Ensure images property exists
+        // Ensure that images property exists and is an array
+        const itemsData = searchData.items.map((item) => ({
+          id: item.id,
+          name: item.name,
+          price: item.price,
+          cover_image: item.cover_image,
+          // item.images && item.images.length > 0 ? item.images[0] : null,
         }));
+        return itemsData;
       }
 
       return [];
@@ -215,7 +212,7 @@ const SearchBar = ({ style }) => {
         // Clear any previous errors
         setError(null);
         // Call the uploadProductImages function to upload images
-        const upc = "yourProductUPC"; // Replace with the actual UPC
+        const upc = "4011"; // Replace with the actual UPC
         const imageUrls = ["url1", "url2"]; // Replace with the actual image URLs
         await uploadProductImages(upc, imageUrls);
 
@@ -334,15 +331,13 @@ const SearchBar = ({ style }) => {
           )}
         </div>
       </div>
-
       {error && <ErrorMessage message={error} />}
-
       {searchResults && (
         <div
           className="search-results-container"
           style={{
             display: "grid",
-            gridTemplateColumns: "repeat(2, calc(50% - 10px))", // Adjust the column widths marginTop: "60px",
+            gridTemplateColumns: "repeat(2, calc(50% - 10px))",
             marginTop: "40px",
             marginLeft: "-30px",
             gap: "5px 15px",
@@ -361,75 +356,69 @@ const SearchBar = ({ style }) => {
                 marginBottom: "20px",
               }}
             >
+              {/* Product Name */}
               <div
                 style={{
-                  marginBottom: "105px", // Adjusted height for text
+                  marginBottom: "15px",
+                  overflow: "hidden",
                 }}
               >
                 <p
                   style={{
-                    fontSize: "10px",
+                    fontSize: "12px",
                     fontWeight: "bold",
-                    overflow: "hidden",
                   }}
                 >
                   {item.name}
                 </p>
               </div>
-              {item.images.map((image, index) => (
-                <img
-                  key={index}
-                  src={`https://images.freshop.com/${image.source_url}_small.png`}
-                  alt={`Product ${index + 1}`}
+
+              {/* Product Images */}
+              {item.cover_image && ( // Change here to use cover_image instead of images
+                <div
                   style={{
-                    width: "100%",
-                    height: "auto",
+                    display: "flex",
+                    flexDirection: "row",
                     marginBottom: "10px",
                   }}
-                />
-              ))}
+                >
+                  <img
+                    src={`https://images.freshop.com/${item.cover_image}_small.png`}
+                    alt={`Product Image`}
+                    style={{
+                      width: "50px", // Adjust the image size as needed
+                      height: "auto",
+                      marginRight: "5px",
+                      borderRadius: "5px",
+                    }}
+                  />
+                </div>
+              )}
+
+              {/* Other Details */}
               <div
                 style={{
-                  position: "absolute",
-                  bottom: "10px",
-                  left: "15px",
-                  width: "100%",
-                  textAlign: "left",
+                  fontSize: "10px",
+                  color: "darkgray",
+                  marginBottom: "5px",
                 }}
               >
-                <p
-                  style={{
-                    fontSize: "7px",
-                    fontWeight: "bold",
-                  }}
-                >
-                  ID: {item.id}
-                </p>
+                ID: {item.id}
               </div>
               <div
                 style={{
-                  position: "absolute",
-                  bottom: "10px",
-                  textAlign: "left",
-                  left: "50%",
-                  transform: "translateX(-50%)",
+                  fontSize: "14px",
+                  fontWeight: "bolder",
+                  color: "darkred",
                 }}
               >
-                <p
-                  style={{
-                    fontSize: "13px",
-                    fontWeight: "bolder",
-                    marginBottom: "30px",
-                    color: "darkred",
-                  }}
-                >
-                  {item.price}
-                </p>
+                {item.price}
               </div>
             </div>
           ))}
         </div>
       )}
+      <ShoppingList /> {/* Render the ShoppingList component here */}
     </div>
   );
 };

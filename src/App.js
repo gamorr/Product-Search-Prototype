@@ -27,9 +27,9 @@ function App() {
           <SearchBar style={searchBarStyle} />
         </div>
       </div>
-      <div style={shoppingListContainerStyle}>
+      {/* <div style={shoppingListContainerStyle}>
         <ShoppingList />
-      </div>
+      </div> */}
     </div>
   );
 }
