@@ -65,9 +65,10 @@ body {
 }
 @media screen and (min-width: 810px) {
   .search-results-item {
-    width: 150px; /* Adjust the width for screens 810px and up */
-    box-sizing: border-box; /* Include padding and border in the width calculation */
-    margin-top: 20px;
+    width: "170px";
+    height: "190px";
+    padding: "7px";
+    position: "relative";
   }
 
   .search-input {

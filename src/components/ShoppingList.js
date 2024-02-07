@@ -1,70 +1,61 @@
-import React from "react";
-import axios from "axios";
+import React, { useState } from "react";
 
 const ShoppingList = () => {
-  const createShoppingList = async (name, note) => {
+  const [listName, setListName] = useState("");
+  const [listNote, setListNote] = useState("");
+
+  const handleCreateList = async () => {
     try {
-      const response = await axios.post(
-        `/api/1/shopping_lists`, // Updated URL to use /api prefix
-        {
-          app_key: process.env.REACT_APP_APP_KEY,
-          name,
-          note,
-        }
-      );
-      console.log("Request Data:", {
-        app_key: process.env.REACT_APP_APP_KEY,
-        name,
-        note,
+      const appKey = process.env.REACT_APP_APP_KEY;
+      const token = process.env.REACT_APP_TOKEN;
+
+      // Construct the URL with query parameters
+      const url = `http://localhost:3001/1/shopping_lists?token=${token}&app_key=${appKey}&name=${encodeURIComponent(
+        listName
+      )}&note=${encodeURIComponent(listNote)}`;
+
+      const response = await fetch(url, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
       });
-      console.log("Response Data:", response.data);
-      if (response.status === 200) {
-        const shoppingList = response.data;
-        console.log("Created Shopping List:", shoppingList);
-        // You can handle the created shopping list as needed, update state, etc.
-      }
-    } catch (error) {
-      console.error("Error creating shopping list:", error);
-      // Handle the error, display a message, etc.
-    }
-  };
 
-  const handleCreateShoppingList = async () => {
-    try {
-      console.log("Before creating shopping list");
-      const listName = prompt("Enter shopping list name:"); // You can use any UI component to get input
-      const listNote = prompt("Enter shopping list note:"); // You can use any UI component to get input
-
-      if (!listName || !listNote) {
-        console.log("Shopping list name and note are required.");
-        // return;
+      if (!response.ok) {
+        throw new Error(`Failed to create shopping list: ${response.status}`);
       }
 
-      await createShoppingList(listName, listNote);
-
-      console.log("After creating shopping list");
+      const data = await response.json();
+      console.log("Shopping List Created:", data);
+      // Handle the response data as needed
     } catch (error) {
-      console.error("Error in handleCreateShoppingList:", error);
+      console.error("Error creating shopping list:", error.message);
+      // Handle the error as needed
     }
   };
 
   return (
     <div>
-      <button
-        onClick={handleCreateShoppingList}
-        style={{
-          backgroundColor: "#DC143C", // Red background color
-          color: "#fff", // White text color
-          padding: "11px 15px", // Padding for better appearance
-          fontSize: "12px", // Font size
-          borderRadius: "9px", // Rounded corners
-          cursor: "pointer", // Cursor style
-          marginLeft: "-23px",
-          border: "none",
-        }}
-      >
-        Create Shopping List
-      </button>
+      <h2>Create a Shopping List</h2>
+      <label>
+        List Name:
+        <input
+          type="text"
+          value={listName}
+          onChange={(e) => setListName(e.target.value)}
+        />
+      </label>
+      <br />
+      <label>
+        List Note:
+        <input
+          type="text"
+          value={listNote}
+          onChange={(e) => setListNote(e.target.value)}
+        />
+      </label>
+      <br />
+      <button onClick={handleCreateList}>Create List</button>
     </div>
   );
 };

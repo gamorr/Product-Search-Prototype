@@ -4,7 +4,6 @@ import SubmitButton from "./SubmitButton";
 import ErrorMessage from "./ErrorMessage";
 import DropdownMenu from "./DropdownMenu";
 import ShoppingList from "./ShoppingList";
-import axios from "axios";
 
 //this is our SearchBar component
 const SearchBar = ({ style }) => {
@@ -27,6 +26,7 @@ const SearchBar = ({ style }) => {
   const limit = process.env.REACT_APP_LIMIT; //maximum number of search results to return
   const relevance_sort = process.env.REACT_APP_RELEVANCE_SORT;
   const render_id = process.env.REACT_APP_RENDER_ID;
+  const upc = process.env.REACT_APP_UPC;
 
   //handle changes in the search input field
   const handleChange = (e) => {
@@ -64,8 +64,8 @@ const SearchBar = ({ style }) => {
       const appKey = process.env.REACT_APP_APP_KEY;
       const appSecret = process.env.REACT_APP_APP_SECRET;
       const storeId = process.env.REACT_APP_STORE_ID;
-      const upc = "4011"; // Assuming upc is present in the item object
-      const upcHasCheckDigit = true; // You may need to adjust this based on your data
+      const upc = process.env.REACT_APP_UPC; // Assuming upc is present in the item object
+      const upcHasCheckDigit = process.env.REACT_APP_UPC_CHECK_DIGIT; // You may need to adjust this based on your data
 
       // Construct the JSON array containing image data
       const imageData = item.images.map((imageId, index) => {
@@ -212,8 +212,7 @@ const SearchBar = ({ style }) => {
         // Clear any previous errors
         setError(null);
         // Call the uploadProductImages function to upload images
-        const upc = "4011"; // Replace with the actual UPC
-        const imageUrls = ["url1", "url2"]; // Replace with the actual image URLs
+        const imageUrls = ["", ""]; // Replace with the actual image URLs
         await uploadProductImages(upc, imageUrls);
 
         // Call the SearchAPI function to fetch search results based on the search input
@@ -348,9 +347,11 @@ const SearchBar = ({ style }) => {
               key={item.id}
               className="search-results-item"
               style={{
+                width: "150px", // Set a fixed width for each item
+                height: "160px", // Set a fixed height for each item
                 boxShadow: "0 2px 5px rgba(0, 0, 0, 0.8)",
-                borderRadius: "18px",
-                padding: "9px",
+                borderRadius: "8px",
+                padding: "7px",
                 position: "relative",
                 backgroundColor: "white",
                 marginBottom: "20px",
@@ -361,6 +362,7 @@ const SearchBar = ({ style }) => {
                 style={{
                   marginBottom: "15px",
                   overflow: "hidden",
+                  height: "30px",
                 }}
               >
                 <p
@@ -386,8 +388,8 @@ const SearchBar = ({ style }) => {
                     src={`https://images.freshop.com/${item.cover_image}_small.png`}
                     alt={`Product Image`}
                     style={{
-                      width: "50px", // Adjust the image size as needed
-                      height: "auto",
+                      width: "70px", // this is for adjusting the image size
+                      height: "fixed",
                       marginRight: "5px",
                       borderRadius: "5px",
                     }}
@@ -401,6 +403,7 @@ const SearchBar = ({ style }) => {
                   fontSize: "10px",
                   color: "darkgray",
                   marginBottom: "5px",
+                  height: "auto",
                 }}
               >
                 ID: {item.id}
