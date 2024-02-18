@@ -1,6 +1,7 @@
 // App.js
 import React from "react";
 import SearchBar from "./components/SearchBar";
+import handleCreateList from "./components/ShoppingList";
 import ShoppingList from "./components/ShoppingList";
 import {
   searchBarStyle,
@@ -14,9 +15,10 @@ function App() {
       <div>
         <p
           style={{
-            fontSize: "23px",
+            marginRight: "250px",
+            marginTop: "6px",
+            fontSize: "20px",
             fontWeight: "bold",
-            height: "20px",
             color: "black",
             textAlign: "center",
           }}
@@ -29,6 +31,7 @@ function App() {
       </div>
       {/* <div style={shoppingListContainerStyle}>
         <ShoppingList />
+        <button onClick={handleCreateList}>Create List</button>
       </div> */}
     </div>
   );

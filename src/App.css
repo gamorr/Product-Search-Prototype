@@ -63,23 +63,3 @@ body {
     margin-left: 8px; /* Adjust margin to keep the submit button on the right */
   }
 }
-@media screen and (min-width: 810px) {
-  .search-results-item {
-    width: "170px";
-    height: "190px";
-    padding: "7px";
-    position: "relative";
-  }
-
-  .search-input {
-    width: 310px; /* Adjust the width for medium-sized screens */
-    max-width: none; /* Reset max-width for medium-sized screens */
-  }
-}
-
-/* Styles for very large screens (e.g., desktops) */
-@media screen and (min-width: 1200px) {
-  .search-results-item {
-    width: 270px; /* Adjust the width for very large screens */
-  }
-}

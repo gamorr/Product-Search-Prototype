@@ -4,6 +4,7 @@ import SubmitButton from "./SubmitButton";
 import ErrorMessage from "./ErrorMessage";
 import DropdownMenu from "./DropdownMenu";
 import ShoppingList from "./ShoppingList";
+import { dropDownListStyle } from "../components/styles";
 
 //this is our SearchBar component
 const SearchBar = ({ style }) => {
@@ -57,10 +58,6 @@ const SearchBar = ({ style }) => {
   // Example function to handle image upload
   const uploadProductImages = async (item) => {
     try {
-      if (!item || !item.images) {
-        throw new Error("Invalid item or item.images is undefined");
-      }
-
       const appKey = process.env.REACT_APP_APP_KEY;
       const appSecret = process.env.REACT_APP_APP_SECRET;
       const storeId = process.env.REACT_APP_STORE_ID;
@@ -177,7 +174,6 @@ const SearchBar = ({ style }) => {
           name: item.name,
           price: item.price,
           cover_image: item.cover_image,
-          // item.images && item.images.length > 0 ? item.images[0] : null,
         }));
         return itemsData;
       }
@@ -317,15 +313,7 @@ const SearchBar = ({ style }) => {
             <DropdownMenu
               suggestionsQ={suggestionsQ} //pass suggested queries
               onSelectSuggestion={handleSelectSuggestion} //pass suggested query variants
-              style={{
-                position: "absolute",
-                top: "100%", //position dropdown below search input
-                width: "72%", //makes dropdown fill the width of the search input
-                backgroundColor: "white", //set background color
-                boxShadow: "0 2px 5px rgba(0, 0, 0, 1.8)", //apply shadow for depth
-                borderRadius: "68px", //apply rounded corners for aesthetics
-                zIndex: 1,
-              }}
+              style={dropDownListStyle}
             />
           )}
         </div>
@@ -335,11 +323,12 @@ const SearchBar = ({ style }) => {
         <div
           className="search-results-container"
           style={{
+            position: "absolute",
             display: "grid",
-            gridTemplateColumns: "repeat(2, calc(50% - 10px))",
-            marginTop: "40px",
-            marginLeft: "-30px",
-            gap: "5px 15px",
+            gridTemplateColumns: "repeat(2, calc(55% - 7px))",
+            top: "105px",
+            left: "48px",
+            gap: "5px 5px",
           }}
         >
           {searchResults.map((item) => (
@@ -347,27 +336,26 @@ const SearchBar = ({ style }) => {
               key={item.id}
               className="search-results-item"
               style={{
-                width: "150px", // Set a fixed width for each item
-                height: "160px", // Set a fixed height for each item
+                position: "relative",
+                right: "23px",
+                bottom: "20px",
+                width: "170px", // Set a fixed width for each item
+                height: "170px", // Set a fixed height for each item
                 boxShadow: "0 2px 5px rgba(0, 0, 0, 0.8)",
+                border: "1px solid black",
                 borderRadius: "8px",
                 padding: "7px",
-                position: "relative",
                 backgroundColor: "white",
                 marginBottom: "20px",
               }}
             >
               {/* Product Name */}
-              <div
-                style={{
-                  marginBottom: "15px",
-                  overflow: "hidden",
-                  height: "30px",
-                }}
-              >
+              <div>
                 <p
                   style={{
-                    fontSize: "12px",
+                    position: "absolute",
+                    top: "1px",
+                    fontSize: "11px",
                     fontWeight: "bold",
                   }}
                 >
@@ -379,9 +367,13 @@ const SearchBar = ({ style }) => {
               {item.cover_image && ( // Change here to use cover_image instead of images
                 <div
                   style={{
+                    position: "absolute",
                     display: "flex",
                     flexDirection: "row",
-                    marginBottom: "10px",
+                    width: "70px",
+                    height: "90px",
+                    bottom: "40px",
+                    left: "45px",
                   }}
                 >
                   <img
@@ -390,7 +382,7 @@ const SearchBar = ({ style }) => {
                     style={{
                       width: "70px", // this is for adjusting the image size
                       height: "fixed",
-                      marginRight: "5px",
+                      position: "relative",
                       borderRadius: "5px",
                     }}
                   />
@@ -400,9 +392,10 @@ const SearchBar = ({ style }) => {
               {/* Other Details */}
               <div
                 style={{
+                  position: "absolute",
                   fontSize: "10px",
                   color: "darkgray",
-                  marginBottom: "5px",
+                  bottom: "10px",
                   height: "auto",
                 }}
               >
@@ -410,7 +403,10 @@ const SearchBar = ({ style }) => {
               </div>
               <div
                 style={{
-                  fontSize: "14px",
+                  position: "absolute",
+                  bottom: "35px",
+                  right: "10px",
+                  fontSize: "12px",
                   fontWeight: "bolder",
                   color: "darkred",
                 }}
