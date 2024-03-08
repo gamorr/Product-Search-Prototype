@@ -10,6 +10,36 @@ const port = 3001;
 app.use(cors());
 app.use(express.json());
 
+// Proxy route for deleting a shopping list item
+app.delete("/1/shopping_list_items/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { app_key, token } = req.query;
+
+    if (!app_key || !token) {
+      return res.status(400).json({ error: "Required parameters are missing" });
+    }
+
+    // Forward the request to Freshop API
+    const freshopResponse = await fetch(
+      `https://api.freshop.com/1/shopping_list_items/${id}?app_key=${app_key}&token=${token}`,
+      {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
+    );
+
+    // Send the response back to the client
+    const freshopData = await freshopResponse.json();
+    res.json(freshopData);
+  } catch (error) {
+    console.error("Error proxying request:", error.message);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+
 // Proxy route for creating a shopping list
 app.post("/1/shopping_lists", async (req, res) => {
   try {
@@ -68,7 +98,7 @@ app.get("/1/shopping_lists", async (req, res) => {
 app.get("/1/shopping_lists/:id", async (req, res) => {
   try {
     const { id } = req.params;
-    const { token, app_key } = req.query;
+    const { token, app_key, store_id } = req.query;
 
     if (!app_key) {
       return res.status(400).json({ error: "app_key is required" });
@@ -76,7 +106,7 @@ app.get("/1/shopping_lists/:id", async (req, res) => {
 
     // Forward the request to Freshop API
     const freshopResponse = await fetch(
-      `https://api.freshop.com/1/shopping_lists/${id}?token=${token}&app_key=${app_key}`
+      `https://api.freshop.com/1/shopping_lists/${id}?token=${token}&app_key=${app_key}&store_id=${store_id}`
     );
 
     // Send the response back to the client

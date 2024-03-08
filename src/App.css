@@ -17,13 +17,6 @@ body {
     padding: 8px 12px; /* Adjust the padding for smaller screens */
     margin-right: 3px; /* Adjust margin for smaller screens */
   }
-
-  /* Adjustments for search-results-item on smaller screens */
-  .search-results-item {
-    width: 130px; /* Adjust the width for smaller screens */
-    margin-top: -20px;
-    max-width: none; /* Reset max-width for smaller screens if necessary */
-  }
 }
 
 @media screen and (max-width: 370px) {
@@ -31,7 +24,7 @@ body {
     margin-left: 210px;
   }
   .search-results-item {
-    margin-bottom: 100px;
+    /* margin-bottom: 100px; */
   }
 }
 /* Styles for medium-sized screens (e.g., tablets) */

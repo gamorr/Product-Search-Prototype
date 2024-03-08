@@ -4,7 +4,11 @@ import SubmitButton from "./SubmitButton";
 import ErrorMessage from "./ErrorMessage";
 import DropdownMenu from "./DropdownMenu";
 import ShoppingList from "./ShoppingList";
-import { dropDownListStyle } from "../components/styles";
+import {
+  dropDownListStyle,
+  addToCartButtonStyle,
+  searcResultsContainerStyle,
+} from "../components/styles";
 
 //this is our SearchBar component
 const SearchBar = ({ style }) => {
@@ -16,6 +20,9 @@ const SearchBar = ({ style }) => {
   const [submitClicked, setSubmitClicked] = useState(false); // Indicates whether the submit button was clicked
   const [showDropdown, setShowDropdown] = useState(false); // Indicates whether the suggestions dropdown is visible
   const [searchResults, setSearchResults] = useState(null);
+  const [showSearchResults, setShowSearchResults] = useState(true); // Initially set to true
+  const [productQuantities, setProductQuantities] = useState({});
+  const [addedProduct, setAddedProduct] = useState(null);
   const suggestionsContainerRef = useRef(null);
   const searchInputRef = useRef(null); // Create a reference to the suggestions container element to detect clicks outside it
   // define API keys and other constants
@@ -28,6 +35,7 @@ const SearchBar = ({ style }) => {
   const relevance_sort = process.env.REACT_APP_RELEVANCE_SORT;
   const render_id = process.env.REACT_APP_RENDER_ID;
   const upc = process.env.REACT_APP_UPC;
+  const shoppingListId = process.env.REACT_APP_ID; // Replace with the actual list ID
 
   //handle changes in the search input field
   const handleChange = (e) => {
@@ -53,6 +61,33 @@ const SearchBar = ({ style }) => {
     // SearchAPI(selectedSuggestion); // Clear suggestions here if needed
     setSuggestionsQ([]);
     setSuggestionsVariants([suggestionsVariants]);
+  };
+
+  // this handles when we want to add an item to shopping list
+  const handleAddItem = async (productId) => {
+    try {
+      // const productId = window.prompt("Enter product ID:");
+      const quantity = productQuantities[productId] || 1;
+      const url = `http://localhost:3001/1/shopping_list_items?app_key=${appKey}&shopping_list_id=${shoppingListId}&product_id=${productId}&quantity=${quantity}&token=${token}`;
+      const response = await fetch(url, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(
+          `Failed to add item to shopping list: ${response.status}`
+        );
+      }
+      const data = await response.json();
+      console.log("Shopping List Item Added:", data);
+      setAddedProduct(productId);
+    } catch (error) {
+      console.error("Error adding item to shopping list:", error.message);
+      // Handle the error as needed
+    }
   };
 
   // Example function to handle image upload
@@ -283,6 +318,7 @@ const SearchBar = ({ style }) => {
           flexDirection: "row",
           alignItems: "center",
           position: "relative",
+          top: "-28px",
         }}
       >
         <div
@@ -305,31 +341,24 @@ const SearchBar = ({ style }) => {
           />
 
           <SubmitButton
-            onClick={handleSearchSubmit} //trigger search on submit button clicked
-            style={submitButtonStyle} //apply margin style
+            onClick={handleSearchSubmit}
+            style={submitButtonStyle}
           />
 
           {showDropdown && (
             <DropdownMenu
-              suggestionsQ={suggestionsQ} //pass suggested queries
-              onSelectSuggestion={handleSelectSuggestion} //pass suggested query variants
+              suggestionsQ={suggestionsQ}
+              onSelectSuggestion={handleSelectSuggestion}
               style={dropDownListStyle}
             />
           )}
         </div>
       </div>
       {error && <ErrorMessage message={error} />}
-      {searchResults && (
+      {showSearchResults && searchResults && (
         <div
           className="search-results-container"
-          style={{
-            position: "absolute",
-            display: "grid",
-            gridTemplateColumns: "repeat(2, calc(55% - 7px))",
-            top: "105px",
-            left: "48px",
-            gap: "5px 5px",
-          }}
+          style={searcResultsContainerStyle}
         >
           {searchResults.map((item) => (
             <div
@@ -337,16 +366,15 @@ const SearchBar = ({ style }) => {
               className="search-results-item"
               style={{
                 position: "relative",
-                right: "23px",
-                bottom: "20px",
-                width: "170px", // Set a fixed width for each item
-                height: "170px", // Set a fixed height for each item
+                width: "140px", // Set a fixed width for each item
+                height: "150px", // Set a fixed height for each item
+                overflow: "hidden",
+                left: "10px",
                 boxShadow: "0 2px 5px rgba(0, 0, 0, 0.8)",
                 border: "1px solid black",
                 borderRadius: "8px",
-                padding: "7px",
+                padding: "10px",
                 backgroundColor: "white",
-                marginBottom: "20px",
               }}
             >
               {/* Product Name */}
@@ -354,9 +382,11 @@ const SearchBar = ({ style }) => {
                 <p
                   style={{
                     position: "absolute",
-                    top: "1px",
+                    top: "-11px",
+                    left: "13px",
                     fontSize: "11px",
                     fontWeight: "bold",
+                    // overflow: "hidden",
                   }}
                 >
                   {item.name}
@@ -373,17 +403,17 @@ const SearchBar = ({ style }) => {
                     width: "70px",
                     height: "90px",
                     bottom: "40px",
-                    left: "45px",
+                    left: "55px",
                   }}
                 >
                   <img
                     src={`https://images.freshop.com/${item.cover_image}_small.png`}
                     alt={`Product Image`}
                     style={{
-                      width: "70px", // this is for adjusting the image size
-                      height: "fixed",
-                      position: "relative",
-                      borderRadius: "5px",
+                      position: "absolute",
+                      bottom: "9px",
+                      right: "9px",
+                      width: "73px", // Make the image fill the container
                     }}
                   />
                 </div>
@@ -393,10 +423,12 @@ const SearchBar = ({ style }) => {
               <div
                 style={{
                   position: "absolute",
-                  fontSize: "10px",
-                  color: "darkgray",
-                  bottom: "10px",
+                  bottom: "3px",
+                  left: "7px",
                   height: "auto",
+                  fontSize: "7px",
+                  width: "40px",
+                  color: "darkgray",
                 }}
               >
                 ID: {item.id}
@@ -404,21 +436,136 @@ const SearchBar = ({ style }) => {
               <div
                 style={{
                   position: "absolute",
-                  bottom: "35px",
-                  right: "10px",
+                  bottom: "14px",
+                  right: "63px",
                   fontSize: "12px",
                   fontWeight: "bolder",
-                  color: "darkred",
+                  color: "black",
+                  // overflow: "hidden",
                 }}
               >
                 {item.price}
               </div>
+              <div
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                }}
+              >
+                {/* Quantity Picker */}
+                <div style={{ position: "relative", marginBottom: "5px" }}>
+                  <button
+                    onMouseOver={(e) => (e.target.style.background = "#bb1133")}
+                    onMouseOut={(e) => (e.target.style.background = "#DC143C")}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      const newQuantities = { ...productQuantities };
+                      newQuantities[item.id] = Math.min(
+                        (newQuantities[item.id] || 1) + 1,
+                        10
+                      );
+                      setProductQuantities(newQuantities);
+                    }}
+                    style={{
+                      position: "relative",
+                      top: "35px",
+                      right: "58px",
+                      overflow: "hidden",
+                      fontSize: "18px",
+                      cursor: "pointer",
+                      color: "white",
+                      backgroundColor: "#DC143C",
+                      boxShadow: "1px 2px 5px rgba(0, 1, 0, 5.8)", //apply shadow for depth
+                      border: "none",
+                      borderRadius: "9px",
+                      padding: "6px 10px",
+                    }}
+                  >
+                    &#9650; {/* Up arrow */}
+                  </button>
+
+                  <div
+                    style={{
+                      position: "relative",
+                      right: "58px",
+                      top: "40px",
+                      fontWeight: "bold",
+                      color: "black",
+                      fontSize: "14px",
+                      textAlign: "center",
+                    }}
+                  >
+                    {productQuantities[item.id] || 1}
+                  </div>
+
+                  <button
+                    onMouseOver={(e) => (e.target.style.background = "#bb1133")}
+                    onMouseOut={(e) => (e.target.style.background = "#DC143C")}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      const newQuantities = { ...productQuantities };
+                      newQuantities[item.id] = Math.max(
+                        (newQuantities[item.id] || 1) - 1,
+                        1
+                      );
+                      setProductQuantities(newQuantities);
+                    }}
+                    style={{
+                      position: "relative",
+                      top: "44px",
+                      right: "58px",
+                      overflow: "hidden",
+                      fontSize: "18px",
+                      cursor: "pointer",
+                      color: "white",
+                      backgroundColor: "#DC143C",
+                      border: "none",
+                      borderRadius: "9px",
+                      boxShadow: "1px 2px 5px rgba(0, 1, 0, 5.8)", //apply shadow for depth
+                      borderRadius: "9px",
+                      padding: "6px 10px",
+                    }}
+                  >
+                    &#9660; {/* Down arrow */}
+                  </button>
+                </div>
+
+                {/* Add to Cart Button */}
+                <button
+                  onClick={() => handleAddItem(item.id)}
+                  style={addToCartButtonStyle} // Pass the product ID to the function
+                  onMouseOver={(e) => (e.target.style.background = "#bb1133")}
+                  onMouseOut={(e) => (e.target.style.background = "#DC143C")}
+                >
+                  Add to Cart
+                </button>
+              </div>
+
+              {/* Notify that the product has been added */}
+              {addedProduct === item.id && (
+                <div
+                  style={{
+                    position: "absolute",
+                    top: "125px",
+                    left: "80px",
+                    transform: "translate(-50%, -50%)",
+                    color: "#DC143C",
+                    fontWeight: "bold",
+                    fontSize: "10px",
+                  }}
+                >
+                  Added to Cart!
+                </div>
+              )}
             </div>
           ))}
         </div>
       )}
-      <ShoppingList /> {/* Render the ShoppingList component here */}
+
+      <ShoppingList></ShoppingList>
     </div>
   );
 };
+
 export default SearchBar;

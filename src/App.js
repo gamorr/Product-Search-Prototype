@@ -15,8 +15,9 @@ function App() {
       <div>
         <p
           style={{
-            marginRight: "250px",
-            marginTop: "6px",
+            position: "relative",
+            right: "135px",
+            bottom: "785px",
             fontSize: "20px",
             fontWeight: "bold",
             color: "black",
@@ -29,10 +30,6 @@ function App() {
           <SearchBar style={searchBarStyle} />
         </div>
       </div>
-      {/* <div style={shoppingListContainerStyle}>
-        <ShoppingList />
-        <button onClick={handleCreateList}>Create List</button>
-      </div> */}
     </div>
   );
 }

@@ -8,6 +8,8 @@ const SubmitButton = ({ onClick }) => {
       onClick={onClick}
       className="submit-button"
       style={submitButtonStyle}
+      onMouseOver={(e) => (e.target.style.background = "#bb1133")}
+      onMouseOut={(e) => (e.target.style.background = "#DC143C")}
     >
       Submit
     </button>

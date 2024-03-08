@@ -1,5 +1,5 @@
 import React from "react";
-
+import { searchInputStyle } from "./styles";
 const SearchInput = ({ value, onChange, onFocus, onBlur }) => {
   return (
     <input
@@ -9,7 +9,7 @@ const SearchInput = ({ value, onChange, onFocus, onBlur }) => {
       onChange={onChange}
       onFocus={onFocus}
       onBlur={onBlur}
-      style={{ height: "19px", padding: "7px", fontSize: "16px" }}
+      style={searchInputStyle}
       placeholder="Search ..."
     />
   );
