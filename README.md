@@ -23,7 +23,7 @@ Endpoint: [https://api.freshop.com/1/product_search_suggestions](https://api.fre
 
 Parameters:
 
-- app_key: Identifies the application (e.g., family_fare, vgs).
+- app_key: Identifies the application.
 - department_id: Filters suggestions by department.
 - q: The query term entered by the user.
 - store_id: Identifies the specific store.
