@@ -2,6 +2,22 @@
 
 https://github.com/user-attachments/assets/6f9e7a57-dcf6-49f7-aa9b-b0753c6ba068
 
+Dependencies: 
+- React (react, react-dom): Used for building the user interface of the application.
+- Express: A lightweight Node.js framework for building the backend server and API proxy.
+- Axios: A promise-based HTTP client for making API requests.
+- dotenv: For managing environment variables securely.
+- CORS: Middleware to handle Cross-Origin Resource Sharing in the backend.
+- React Transition Group: For adding animations and transitions to React components.
+
+DevDependencies:
+- Babel (@babel/core, @babel/preset-env, @babel/preset-react): Used for transpiling modern JavaScript and React code.
+- Jest: A testing framework for running unit tests.
+- React Testing Library (@testing-library/react, @testing-library/jest-dom, @testing-library/user-event): For testing React components.
+- jest-fetch-mock: For mocking fetch requests in tests.
+- jsdom: A JavaScript implementation of the DOM for testing purposes.
+
+
 ## Available Scripts
 
 In the project directory, you can run:
