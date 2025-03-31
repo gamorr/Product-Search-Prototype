@@ -1,3 +1,7 @@
+
+
+https://github.com/user-attachments/assets/6f9e7a57-dcf6-49f7-aa9b-b0753c6ba068
+
 ## Available Scripts
 
 In the project directory, you can run:
@@ -53,6 +57,10 @@ Optional Parameters: Many parameters like relevance_sort, render_id are likely o
 - **Search Input & Button:** Implement a search input field with a submit button. When a user types a query and clicks the submit button, trigger the Search API.
 
 - **Autocomplete Feature:** As the user types in the search input, dynamically fetch suggestions from the Search Suggestion API. Display these suggestions in a dropdown menu below the input field. Implement a debounce mechanism to limit API calls while typing.
+
+
+
+
 
 - **Handling API Responses:**
 
